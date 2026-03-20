@@ -45,12 +45,12 @@ class ChallengeController extends Controller
     public function update(Request $request, Challenge $challenge)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category' => 'required|string',
-            'difficulty' => 'required|string',
-            'points' => 'required|integer|min:0',
-            'co2_saved' => 'required|numeric|min:0',
+            'title' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'category' => 'sometimes|string',
+            'difficulty' => 'sometimes|string',
+            'points' => 'sometimes|integer|min:0',
+            'co2_saved' => 'sometimes|numeric|min:0',
             'image_url' => 'nullable|url',
         ]);
 
