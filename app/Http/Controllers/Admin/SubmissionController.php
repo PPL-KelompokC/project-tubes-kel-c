@@ -19,7 +19,7 @@ class SubmissionController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('admin.submissions', compact('submissions'));
+        return view('admin.submissions.index', compact('submissions'));
     }
 
     /**

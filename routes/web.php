@@ -9,6 +9,7 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeSubmissionController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\ChallengeController as AdminChallenge;
 use App\Http\Controllers\Admin\BadgeController as AdminBadge;
@@ -73,7 +74,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Other pages
     Route::get('/carbon', fn() => view('carbon'))->name('carbon');
-    Route::get('/map',    fn() => view('map'))->name('map');
+    Route::get('/map',    [EventController::class, 'index'])->name('map');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
     Route::get('/profile', fn() => view('profile'))->name('profile');
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');

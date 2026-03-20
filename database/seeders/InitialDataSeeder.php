@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Challenge;
 use App\Models\Badge;
+use App\Models\Event;
 use Illuminate\Support\Facades\Hash;
 
 class InitialDataSeeder extends Seeder
@@ -121,6 +122,51 @@ class InitialDataSeeder extends Seeder
         foreach ($challenges as $c) {
             Challenge::updateOrCreate(['title' => $c['title']], $c);
         }
+
+        // Add Sample Events
+        $user = User::where('email', 'user@siklim.com')->first();
+        if ($user) {
+            $events = [
+                [
+                    'name' => 'Mangrove Planting Day',
+                    'type' => 'nature',
+                    'date' => now()->addDays(10),
+                    'participants' => 45,
+                    'x' => 42.5,
+                    'y' => 55.2,
+                    'description' => 'A community effort to restore mangrove forests along the coast.',
+                    'status' => 'accepted',
+                    'user_id' => $user->id,
+                ],
+                [
+                    'name' => 'City Park Cleanup',
+                    'type' => 'cleanup',
+                    'date' => now()->addDays(15),
+                    'participants' => 30,
+                    'x' => 58.2,
+                    'y' => 42.1,
+                    'description' => 'Help us keep our city parks clean and beautiful.',
+                    'status' => 'accepted',
+                    'user_id' => $user->id,
+                ],
+                [
+                    'name' => 'Eco-Friendly Living Workshop',
+                    'type' => 'workshop',
+                    'date' => now()->addDays(20),
+                    'participants' => 20,
+                    'x' => 48.9,
+                    'y' => 48.5,
+                    'description' => 'Learn how to reduce your carbon footprint in daily life.',
+                    'status' => 'pending',
+                    'user_id' => $user->id,
+                ],
+            ];
+
+            foreach ($events as $event) {
+                Event::updateOrCreate(['name' => $event['name']], $event);
+            }
+        }
+    }
 
         // Badges
         $badges = [

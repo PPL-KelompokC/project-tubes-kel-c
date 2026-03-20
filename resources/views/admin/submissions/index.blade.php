@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('admin.layouts.app')
 
 @section('title', 'Admin — Submissions Review')
 
 @section('content')
-<div class="p-4 lg:p-6 max-w-5xl mx-auto space-y-5">
+<div class="space-y-5">
 
     {{-- Flash --}}
     @if(session('success'))
@@ -19,7 +19,6 @@
             <h1 class="text-xl font-black text-gray-900">Submissions Under Review</h1>
             <p class="text-sm text-gray-500 mt-0.5">{{ $submissions->total() }} submissions need manual review</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="text-sm text-green-600 font-semibold hover:text-green-700">← Admin Home</a>
     </div>
 
     @forelse($submissions as $submission)

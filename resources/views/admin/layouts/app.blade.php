@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siklim Admin — @yield('title', 'Dashboard')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,17 +15,24 @@
         .transition-200 { transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900">
+<body class="bg-[#f8fafc] text-slate-900" x-data="{ sidebarOpen: false }">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        @include('admin.layouts.partials.sidebar')
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-show="sidebarOpen" @click="sidebarOpen = false"></div>
+        <aside class="fixed inset-y-0 left-0 w-72 bg-white border-r border-slate-200 flex flex-col z-50 transform lg:transform-none transition-transform duration-300"
+               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+            @include('admin.layouts.partials.sidebar')
+        </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative lg:ml-72">
             <!-- Top Navbar -->
-            <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-20">
-                <div class="flex items-center gap-4 flex-1">
-                    <div class="relative max-w-md w-full">
+            <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-slate-500 hover:text-emerald-600" @click.stop="sidebarOpen = !sidebarOpen">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <div class="hidden sm:block relative max-w-md w-full">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </span>
