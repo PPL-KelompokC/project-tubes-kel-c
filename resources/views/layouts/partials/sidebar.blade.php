@@ -48,13 +48,13 @@
 <!-- Sidebar -->
 <aside id="sidebar" class="fixed top-0 left-0 h-full z-50 flex flex-col bg-white border-r border-gray-100 sidebar-transition -translate-x-full lg:translate-x-0 lg:static lg:z-auto w-64 shadow-xl lg:shadow-none">
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-100">
-        <div class="w-9 h-9 flex items-center justify-center flex-shrink-0">
-            <img src="{{ asset('image/icon-siklim.png') }}" alt="Siklim Logo" class="w-full h-full object-contain">
+    <div class="flex items-center gap-3 px-4 py-5 border-b border-gray-100">
+        <div class="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-transform hover:scale-105 duration-300">
+            <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde Logo" class="w-full h-full object-contain drop-shadow-sm">
         </div>
         <div class="flex flex-col">
-            <span class="text-base font-black text-gray-900 leading-none">EcoChallenge</span>
-            <span class="text-[10px] font-bold text-green-600 uppercase tracking-wider mt-0.5">Siklim Platform</span>
+            <span class="text-base font-black text-gray-900 leading-none tracking-tight">TerraVerde</span>
+            <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest mt-1">Eco Platform</span>
         </div>
         <button onclick="toggleSidebar()" class="ml-auto lg:hidden text-gray-400 hover:text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -127,6 +127,17 @@
                 <span class="text-[10px] text-gray-500">Rank #{{ $currentUser['rank'] }} worldwide</span>
             </div>
         </div>
+        
+        <!-- Logout Button -->
+        <form action="{{ route('logout') }}" method="POST" class="mt-3">
+            @csrf
+            <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-150 group">
+                <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                </div>
+                <span class="text-sm font-bold tracking-tight">Sign Out</span>
+            </button>
+        </form>
     </div>
 </aside>
 

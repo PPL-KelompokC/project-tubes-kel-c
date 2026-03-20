@@ -22,17 +22,13 @@
         'joinedDate' => $user->created_at->format('M Y'),
     ];
 
-    $unlockedBadges = $user->badges->map(function($b) {
-        return ['id' => $b->id, 'name' => $b->name, 'emoji' => $b->emoji, 'rarity' => $b->rarity];
+    $unlockedBadges = collect([]); // Placeholder for future badge system
+
+    $recentCompletions = $user->submissions()->where('status', 'verified')->latest()->take(3)->get()->map(function($s) {
+        return ['id' => $s->id, 'title' => $s->challenge->title, 'category' => $s->challenge->category, 'co2Saved' => $s->challenge->co2_saved, 'points' => $s->points_awarded, 'emoji' => '🎯'];
     });
 
-    $recentCompletions = $user->challenges()->wherePivot('status', 'completed')->latest()->take(3)->get()->map(function($c) {
-        return ['id' => $c->id, 'title' => $c->title, 'category' => $c->category, 'co2Saved' => $c->co2_saved, 'points' => $c->points, 'emoji' => '🎯'];
-    });
-
-    $myPosts = $user->posts()->latest()->get()->map(function($p) {
-        return ['id' => $p->id, 'content' => $p->content, 'likes' => $p->likes, 'comments' => $p->comments, 'timestamp' => $p->created_at->diffForHumans()];
-    });
+    $myPosts = collect([]); // Placeholder for future post system
 
     $rarityColors = [
         'common' => ['bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'border' => 'border-gray-200'],

@@ -86,20 +86,22 @@
             </div>
             <div class="flex-1 overflow-y-auto p-2">
                 <div class="space-y-1">
-                    @forelse($stats['recent_activities'] as $activity)
+                    @forelse($stats['recent_submissions'] as $submission)
                         <div class="p-4 rounded-2xl hover:bg-slate-50 transition-200 group">
                             <div class="flex items-start gap-4">
                                 <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 group-hover:bg-white transition-200">
-                                    {{ substr($activity->user->name, 0, 1) }}
+                                    {{ substr($submission->user->name, 0, 1) }}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-slate-900 truncate">{{ $activity->user->name }}</p>
+                                    <p class="text-sm font-bold text-slate-900 truncate">{{ $submission->user->name }}</p>
                                     <p class="text-xs text-slate-500 mt-0.5">
-                                        Completed a challenge
+                                        Submitted {{ $submission->challenge->title }}
                                     </p>
                                     <div class="flex items-center gap-3 mt-2">
-                                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">-{{ $activity->co2_saved }}kg CO₂</span>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $activity->created_at->diffForHumans() }}</span>
+                                        <span class="text-[10px] font-bold {{ $submission->statusColor() }} px-2 py-0.5 rounded-md">
+                                            {{ $submission->statusLabel() }}
+                                        </span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ $submission->created_at->diffForHumans() }}</span>
                                     </div>
                                 </div>
                             </div>

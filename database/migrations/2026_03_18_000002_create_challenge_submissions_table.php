@@ -13,18 +13,12 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('challenge_id')->constrained()->onDelete('cascade');
             $table->string('photo_path');
+            $table->string('photo_hash')->nullable();
             $table->timestamp('exif_timestamp')->nullable();
             $table->decimal('exif_lat', 10, 7)->nullable();
             $table->decimal('exif_lng', 10, 7)->nullable();
-            $table->integer('ai_score')->nullable();
-            $table->json('ai_labels')->nullable();
-            $table->enum('status', [
-                'pending_ai',
-                'pending_community',
-                'verified',
-                'rejected',
-                'manual_review',
-            ])->default('pending_ai');
+            $table->enum('status', ['pending_admin', 'verified', 'rejected'])->default('pending_admin');
+            $table->text('rejection_reason')->nullable();
             $table->integer('points_awarded')->default(0);
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();

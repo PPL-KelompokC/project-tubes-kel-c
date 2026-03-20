@@ -42,11 +42,11 @@
             </button>
         @endauth
         
-        <a href="{{ route('landing') }}" class="flex items-center gap-2 group">
-            <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <img src="{{ asset('image/icon-siklim.png') }}" alt="Siklim" class="w-full h-full object-contain">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
+            <div class="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
+                <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde Logo" class="w-full h-full object-contain drop-shadow-sm">
             </div>
-            <span class="text-sm font-black text-gray-900 tracking-tight hidden xs:block">EcoChallenge</span>
+            <span class="text-base font-black text-gray-900 tracking-tight hidden xs:block">TerraVerde</span> 
         </a>
     </div>
 

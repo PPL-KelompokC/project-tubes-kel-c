@@ -45,8 +45,10 @@
 
 <div class="p-4 lg:p-6 max-w-5xl mx-auto space-y-6">
     <!-- Progress overview -->
-    <div class="eco-gradient rounded-3xl p-6 text-white eco-pattern animate-bounce-in">
-        <div class="flex items-center justify-between gap-6">
+    <div class="rounded-3xl p-6 text-white relative overflow-hidden animate-bounce-in shadow-lg" style="background: linear-gradient(135deg, #15803d 0%, #047857 45%, #0369a1 100%);">
+        <!-- Decorative overlay circles -->
+        <div class="absolute inset-0 rounded-3xl" style="background-image: radial-gradient(circle at 15% 75%, rgba(52,211,153,0.18) 0%, transparent 55%), radial-gradient(circle at 85% 15%, rgba(56,189,248,0.15) 0%, transparent 55%);"></div>
+        <div class="relative z-10 flex items-center justify-between gap-6">
             <div>
                 <p class="text-green-200 text-sm font-medium mb-1">Badge Collection</p>
                 <h2 class="text-2xl font-black">{{ $unlockedCount }} / {{ $totalCount }} Unlocked</h2>

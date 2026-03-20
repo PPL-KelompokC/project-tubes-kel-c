@@ -51,21 +51,7 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    public function badges()
-    {
-        return $this->belongsToMany(Badge::class, 'user_badges')
-                    ->withTimestamps();
-    }
-
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
-    }
-
-    public function activities()
-    {
-        return $this->hasMany(UserActivity::class);
-    }
+    // Removed unused features relations
 
     public function submissions()
     {

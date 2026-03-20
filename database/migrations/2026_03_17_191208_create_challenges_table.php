@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('points');
             $table->decimal('co2_saved', 8, 2);
             $table->string('image_url')->nullable();
+            $table->boolean('is_daily')->default(false);
+            $table->date('active_date')->nullable();
             $table->timestamps();
         });
     }

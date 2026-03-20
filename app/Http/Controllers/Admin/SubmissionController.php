@@ -14,8 +14,8 @@ class SubmissionController extends Controller
      */
     public function index()
     {
-        $submissions = ChallengeSubmission::with(['user', 'challenge', 'verifications'])
-            ->where('status', 'manual_review')
+        $submissions = ChallengeSubmission::with(['user', 'challenge'])
+            ->where('status', 'pending_admin')
             ->latest()
             ->paginate(20);
 
@@ -27,8 +27,8 @@ class SubmissionController extends Controller
      */
     public function approve(ChallengeSubmission $submission)
     {
-        if ($submission->status !== 'manual_review') {
-            return back()->with('error', 'Submission is not in manual review.');
+        if ($submission->status !== 'pending_admin') {
+            return back()->with('error', 'Submission is not pending admin review.');
         }
 
         $submitter  = $submission->user;
@@ -53,13 +53,16 @@ class SubmissionController extends Controller
     /**
      * Admin rejects a submission.
      */
-    public function reject(ChallengeSubmission $submission)
+    public function reject(Request $request, ChallengeSubmission $submission)
     {
-        if ($submission->status !== 'manual_review') {
-            return back()->with('error', 'Submission is not in manual review.');
+        if ($submission->status !== 'pending_admin') {
+            return back()->with('error', 'Submission is not pending admin review.');
         }
 
-        $submission->update(['status' => 'rejected']);
+        $submission->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->input('reason'),
+        ]);
 
         return back()->with('success', 'Submission rejected.');
     }

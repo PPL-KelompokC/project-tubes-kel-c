@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessSubmissionAI;
 use App\Models\Challenge;
 use App\Models\ChallengeSubmission;
 use Illuminate\Http\Request;
@@ -38,13 +37,20 @@ class ChallengeSubmissionController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'You have already submitted this challenge today.');
+            if ($existing->status === 'rejected') {
+                // If it was rejected, delete the old one to allow a fresh submission
+                $existing->delete();
+            } else {
+                return back()->with('error', 'You have already submitted this challenge today.');
+            }
         }
 
         // ── Layer 1: Validate file ────────────────────────────────
         $request->validate([
             'photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:10240'],
         ]);
+
+        $file = $request->file('photo');
 
         $file = $request->file('photo');
 
@@ -63,13 +69,6 @@ class ChallengeSubmissionController extends Controller
                     'Y:m:d H:i:s',
                     $exif['DateTimeOriginal']
                 );
-
-                // Reject if older than 24 hours
-                if ($exifTimestamp->diffInHours(now()) > 24) {
-                    return back()->with('error',
-                        'Photo was taken more than 24 hours ago. Please take a fresh photo of your eco action.'
-                    );
-                }
             }
 
             // Extract GPS
@@ -93,14 +92,11 @@ class ChallengeSubmissionController extends Controller
             'exif_timestamp' => $exifTimestamp,
             'exif_lat'       => $exifLat,
             'exif_lng'       => $exifLng,
-            'status'         => 'pending_ai',
+            'status'         => 'pending_admin',
         ]);
 
-        // ── Layer 3: Dispatch AI verification job (async) ─────────
-        ProcessSubmissionAI::dispatch($submission);
-
         return redirect()->route('dashboard')
-            ->with('success', 'Photo submitted! Our AI is verifying your action. Check the community feed soon.');
+            ->with('success', 'Submission received, waiting for admin review.');
     }
 
     // ── Helpers ─────────────────────────────────────────────────────

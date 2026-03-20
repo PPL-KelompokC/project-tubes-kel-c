@@ -15,15 +15,13 @@ class ChallengeSubmission extends Model
         'exif_timestamp',
         'exif_lat',
         'exif_lng',
-        'ai_score',
-        'ai_labels',
         'status',
         'points_awarded',
         'verified_at',
+        'rejection_reason',
     ];
 
     protected $casts = [
-        'ai_labels'      => 'array',
         'exif_timestamp' => 'datetime',
         'verified_at'    => 'datetime',
         'exif_lat'       => 'decimal:7',
@@ -42,36 +40,11 @@ class ChallengeSubmission extends Model
         return $this->belongsTo(Challenge::class);
     }
 
-    public function verifications(): HasMany
-    {
-        return $this->hasMany(SubmissionVerification::class, 'submission_id');
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────
-
-    public function verifyCount(): int
-    {
-        return $this->verifications()->where('type', 'verify')->count();
-    }
-
-    public function reportCount(): int
-    {
-        return $this->verifications()->where('type', 'report')->count();
-    }
-
-    /** Check if a given user has already voted on this submission */
-    public function userVote(int $userId): ?string
-    {
-        $vote = $this->verifications()->where('user_id', $userId)->first();
-        return $vote?->type;
-    }
-
     /** Status label for UI */
     public function statusLabel(): string
     {
         return match ($this->status) {
-            'pending_ai'     => 'Processing…',
-            'manual_review'  => 'Awaiting Admin Review',
+            'pending_admin'  => 'Awaiting Admin Review',
             'verified'       => 'Verified',
             'rejected'       => 'Rejected',
             default          => ucfirst($this->status),
@@ -81,8 +54,7 @@ class ChallengeSubmission extends Model
     public function statusColor(): string
     {
         return match ($this->status) {
-            'pending_ai'    => 'text-gray-500 bg-gray-100',
-            'manual_review' => 'text-yellow-700 bg-yellow-100',
+            'pending_admin' => 'text-yellow-700 bg-yellow-100',
             'verified'      => 'text-green-700 bg-green-100',
             'rejected'      => 'text-red-700 bg-red-100',
             default         => 'text-gray-600 bg-gray-100',

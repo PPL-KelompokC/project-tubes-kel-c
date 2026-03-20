@@ -26,8 +26,6 @@
         @php
             $challenge   = $submission->challenge;
             $user        = $submission->user;
-            $verifyCount = $submission->verifyCount();
-            $reportCount = $submission->reportCount();
         @endphp
         <div class="bg-white rounded-2xl border border-orange-200 shadow-sm overflow-hidden">
             <div class="flex flex-col md:flex-row">
@@ -50,26 +48,9 @@
                             <p class="text-base font-black text-gray-900">{{ $challenge->title }}</p>
                             <p class="text-xs text-gray-500 mt-0.5">by <strong>{{ $user->name }}</strong> · {{ $submission->created_at->diffForHumans() }}</p>
                         </div>
-                        <span class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full flex-shrink-0">Manual Review</span>
+                        <span class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-full flex-shrink-0">Pending Admin Review</span>
                     </div>
 
-                    {{-- Stats --}}
-                    <div class="grid grid-cols-3 gap-3 mb-4">
-                        <div class="bg-green-50 rounded-xl p-3 text-center">
-                            <p class="text-lg font-black text-green-700">{{ $verifyCount }}</p>
-                            <p class="text-[10px] text-green-600">Verifies</p>
-                        </div>
-                        <div class="bg-red-50 rounded-xl p-3 text-center">
-                            <p class="text-lg font-black text-red-700">{{ $reportCount }}</p>
-                            <p class="text-[10px] text-red-600">Reports</p>
-                        </div>
-                        <div class="bg-blue-50 rounded-xl p-3 text-center">
-                            <p class="text-lg font-black text-blue-700">{{ $submission->ai_score ?? '—' }}{{ $submission->ai_score ? '%' : '' }}</p>
-                            <p class="text-[10px] text-blue-600">AI Score</p>
-                        </div>
-                    </div>
-
-                    {{-- EXIF info --}}
                     @if($submission->exif_timestamp)
                         <p class="text-xs text-gray-400 mb-3">
                             Photo taken: {{ $submission->exif_timestamp->format('d M Y H:i') }}
@@ -77,15 +58,6 @@
                                 · GPS: {{ round($submission->exif_lat, 4) }}, {{ round($submission->exif_lng, 4) }}
                             @endif
                         </p>
-                    @endif
-
-                    {{-- AI labels --}}
-                    @if($submission->ai_labels)
-                        <div class="flex flex-wrap gap-1.5 mb-4">
-                            @foreach($submission->ai_labels as $label)
-                                <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ $label }}</span>
-                            @endforeach
-                        </div>
                     @endif
 
                     {{-- Actions --}}
@@ -97,11 +69,12 @@
                                 Approve (+{{ $challenge->points }} pts)
                             </button>
                         </form>
-                        <form action="{{ route('admin.submissions.reject', $submission) }}" method="POST">
+                        <form action="{{ route('admin.submissions.reject', $submission) }}" method="POST" class="flex items-center gap-2">
                             @csrf
+                            <input type="text" name="reason" placeholder="Rejection reason (optional)" class="border border-gray-200 rounded-xl px-3 py-2 text-sm w-48 focus:ring-red-500 focus:border-red-500" required>
                             <button type="submit"
                                 onclick="return confirm('Reject this submission?')"
-                                class="bg-red-100 hover:bg-red-200 text-red-700 text-sm font-bold px-6 py-2.5 rounded-xl transition-colors flex items-center gap-2">
+                                class="bg-red-100 hover:bg-red-200 text-red-700 text-sm font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
                                 Reject
                             </button>

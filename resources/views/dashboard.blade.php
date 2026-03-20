@@ -101,7 +101,7 @@
                 @php
                     $status      = $challenge['status'];
                     $isVerified  = $status === 'verified';
-                    $isPending   = in_array($status, ['pending_ai', 'manual_review']);
+                    $isPending   = $status === 'pending_admin';
                     $isRejected  = $status === 'rejected';
                     $isSubmitted = $challenge['submitted'];
                     $cat         = $categoryConfig[strtolower($challenge['category'])] ?? $categoryConfig['food'];
@@ -162,13 +162,22 @@
                             <div class="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
                                 <svg class="animate-spin h-4 w-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                 <span class="text-sm font-semibold text-yellow-700">
-                                    @if($status === 'pending_ai') AI Verifying… @else Awaiting Admin Review @endif
+                                    Waiting for admin review
                                 </span>
                             </div>
                         @elseif($isRejected)
+                            <div class="mb-3 text-red-600 text-[10px] font-semibold bg-red-50 p-2 rounded-lg border border-red-100 flex flex-col gap-1">
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                    <span>Rejected by Admin</span>
+                                </div>
+                                @if(!empty($challenge['submission']->rejection_reason))
+                                    <span class="text-red-500 font-normal italic">"{{ $challenge['submission']->rejection_reason }}"</span>
+                                @endif
+                            </div>
                             <a href="{{ route('challenges.submit', $challenge['id']) }}"
-                               class="w-full bg-red-100 hover:bg-red-200 text-red-700 text-sm font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                               class="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                                 Retake Photo
                             </a>
                         @else
@@ -235,11 +244,11 @@
                         $isToday = strtolower($day['day']) === strtolower(now()->format('D'));
                     @endphp
                     <div class="flex flex-col items-center gap-1.5 flex-1 group">
-                        <div class="w-full relative">
+                        <div class="w-full relative h-20 flex items-end">
                             <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-gray-900 text-white text-[10px] rounded-lg px-2 py-1 whitespace-nowrap z-10">
                                 {{ $day['co2'] }}kg CO₂ · {{ $day['points'] }}pts
                             </div>
-                            <div class="rounded-t-lg mx-auto transition-all {{ $isToday ? 'bg-green-500' : 'bg-green-100 hover:bg-green-200' }}" style="height: {{ $height }}%; min-height: 8px; max-height: 80px; width: 100%"></div>
+                            <div class="rounded-t-lg mx-auto transition-all {{ $isToday ? 'bg-green-500' : 'bg-green-100 hover:bg-green-200' }}" style="height: {{ $day['co2'] > 0 ? max(15, $height) : 8 }}%; width: 100%"></div>
                         </div>
                         <span class="text-[10px] font-medium {{ $isToday ? 'text-green-600' : 'text-gray-400' }}">{{ $day['day'] }}</span>
                     </div>

@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Sign In — Siklim Admin')
+@section('title', 'Sign In — TerraVerde')
 
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-[#f8fafc] p-6">
     <div class="w-full max-w-[440px] space-y-8">
         <!-- Logo -->
         <div class="text-center">
-            <div class="inline-flex items-center justify-center mb-6">
-                <img src="{{ asset('image/icon-siklim.png') }}" alt="Siklim Logo" class="w-16 h-16 object-contain drop-shadow-xl">
+            <div class="inline-flex items-center justify-center mb-6 transition-transform hover:scale-105 duration-300">
+                <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde Logo" class="w-20 h-20 object-contain drop-shadow-2xl">
             </div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">Welcome back</h1>
-            <p class="text-slate-500 text-sm mt-2 font-medium">Please enter your details to sign in to your account.</p>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Welcome back</h1>
+            <p class="text-slate-500 text-sm mt-3 font-medium italic">Empowering your sustainable journey</p>
         </div>
 
         <!-- Card -->
@@ -27,7 +27,7 @@
                 @csrf
                 <div class="space-y-2">
                     <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-                    <input type="email" name="email" placeholder="admin@siklim.com" required
+                    <input type="email" name="email" placeholder="example@terraverde.com" required
                         class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all placeholder:text-slate-300">
                     @error('email') <p class="text-[10px] font-bold text-rose-500 mt-1 ml-1">{{ $message }}</p> @enderror
                 </div>
@@ -61,7 +61,7 @@
         </div>
 
         <p class="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-            &copy; 2026 Siklim Eco Platform
+            &copy; 2026 TerraVerde Eco Platform
         </p>
     </div>
 </div>

@@ -46,8 +46,9 @@ class DashboardController extends Controller
             ];
         });
 
+        // FIX 1: count only VERIFIED submissions for "Today's Progress"
         $completedToday = $todaysChallenges->filter(
-            fn($c) => in_array($c['status'], ['pending_community', 'verified'])
+            fn($c) => $c['status'] === 'verified'
         )->count();
 
         $progressPct = count($todaysChallenges) > 0
@@ -58,19 +59,29 @@ class DashboardController extends Controller
         $rank     = User::where('role', '!=', 'admin')->where('points', '>', $user->points)->count() + 1;
         $topUsers = User::where('role', '!=', 'admin')->orderByDesc('points')->take(5)->get();
 
-        // ── Weekly chart data ──────────────────────────────────────
+        // ── FIX 2: Weekly chart data from verified submissions ─────
         $weeklyData  = [];
         $days        = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         $startOfWeek = now()->startOfWeek();
 
         foreach ($days as $i => $dayName) {
-            $date     = $startOfWeek->copy()->addDays($i);
-            $activity = $user->activities()->whereDate('activity_date', $date)->first();
+            $date = $startOfWeek->copy()->addDays($i);
+
+            $co2 = ChallengeSubmission::where('challenge_submissions.user_id', $user->id)
+                ->where('challenge_submissions.status', 'verified')
+                ->whereDate('challenge_submissions.verified_at', $date)
+                ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+                ->sum('challenges.co2_saved');
+
+            $points = ChallengeSubmission::where('user_id', $user->id)
+                ->where('status', 'verified')
+                ->whereDate('verified_at', $date)
+                ->sum('points_awarded');
 
             $weeklyData[] = [
                 'day'    => $dayName,
-                'co2'    => $activity ? (float) $activity->co2_saved : 0,
-                'points' => $activity ? (int) $activity->points_earned : 0,
+                'co2'    => (float) $co2,
+                'points' => (int) $points,
             ];
         }
 

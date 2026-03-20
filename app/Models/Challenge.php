@@ -16,13 +16,11 @@ class Challenge extends Model
         'points',
         'co2_saved',
         'image_url',
-        'ai_keywords',
         'is_daily',
         'active_date',
     ];
 
     protected $casts = [
-        'ai_keywords' => 'array',
         'is_daily'    => 'boolean',
         'active_date' => 'date',
         'co2_saved'   => 'decimal:2',
@@ -51,12 +49,12 @@ class Challenge extends Model
                      ->where('active_date', today());
     }
 
-    /** Count how many users have a verified/pending_community submission today */
+    /** Count how many users have a verified/pending_admin/rejected submission today */
     public function participantCount(): int
     {
         return $this->submissions()
                     ->whereDate('created_at', today())
-                    ->whereIn('status', ['pending_community', 'verified'])
+                    ->whereIn('status', ['pending_admin', 'verified', 'rejected'])
                     ->count();
     }
 }

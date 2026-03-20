@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Register - Climate Tracker')
+@section('title', 'Join TerraVerde')
 
 @section('content')
 <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 eco-pattern">
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <a href="/" class="inline-flex items-center gap-2 mb-6 group">
-            <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-green-100 group-hover:scale-110 transition-transform">
-                🌍
+        <a href="/" class="inline-flex flex-col items-center gap-3 mb-6 group">
+            <div class="w-20 h-20 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
+                <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde Logo" class="w-full h-full object-contain drop-shadow-2xl">
             </div>
-            <span class="text-2xl font-black text-gray-900 tracking-tight">Climate Tracker</span>
+            <span class="text-3xl font-black text-gray-900 tracking-tight">TerraVerde</span>
         </a>
-        <h2 class="text-3xl font-black text-gray-900 leading-tight">Join the movement!</h2>
-        <p class="mt-2 text-sm text-gray-500 font-medium">Create your account and start your climate journey.</p>
+        <h2 class="text-2xl font-black text-gray-900 leading-tight">Join the movement!</h2>
+        <p class="mt-3 text-sm text-gray-500 font-medium italic">Start your sustainable journey today.</p>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4">

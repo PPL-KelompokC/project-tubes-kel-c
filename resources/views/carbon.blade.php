@@ -16,11 +16,11 @@
     
     foreach ($days as $i => $dayName) {
         $date = $startOfWeek->copy()->addDays($i);
-        $activity = $user->activities()->whereDate('activity_date', $date->format('Y-m-d'))->first();
+        $activity = $user->submissions()->where('status', 'verified')->whereDate('created_at', $date->format('Y-m-d'))->first();
         
         $weeklyData[] = [
             'day' => $dayName,
-            'co2' => $activity ? (float)$activity->co2_saved : 0
+            'co2' => $activity ? (float)$activity->challenge->co2_saved : 0
         ];
     }
 
@@ -44,7 +44,9 @@
 <div class="p-4 lg:p-6 max-w-6xl mx-auto space-y-6">
 
     <!-- Hero metric -->
-    <div class="eco-gradient rounded-3xl p-6 lg:p-8 text-white eco-pattern relative overflow-hidden animate-bounce-in">
+    <div class="rounded-3xl p-6 lg:p-8 text-white relative overflow-hidden animate-bounce-in shadow-lg" style="background: linear-gradient(135deg, #15803d 0%, #047857 45%, #0369a1 100%);">
+        <!-- Decorative overlay circles -->
+        <div class="absolute inset-0 rounded-3xl" style="background-image: radial-gradient(circle at 15% 75%, rgba(52,211,153,0.18) 0%, transparent 55%), radial-gradient(circle at 85% 15%, rgba(56,189,248,0.15) 0%, transparent 55%);"></div>
         <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center gap-6">
             <div class="flex-1">
                 <p class="text-green-200 text-sm font-medium mb-2">Total Carbon Saved</p>
@@ -100,11 +102,11 @@
                 @php 
                     $height = round(($day['co2'] / $maxCo2) * 100);
                 @endphp
-                <div class="flex-1 flex flex-col items-center gap-2 group relative">
+                <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white text-[10px] px-2 py-1 rounded-lg z-10 whitespace-nowrap">
                         {{ $day['co2'] }}kg CO₂
                     </div>
-                    <div class="w-full bg-green-100 rounded-t-lg transition-all hover:bg-green-500 group-hover:animate-pulse" style="height: {{ $height }}%"></div>
+                    <div class="w-full bg-green-100 rounded-t-lg transition-all hover:bg-green-500 group-hover:animate-pulse" style="height: {{ $day['co2'] > 0 ? max(10, $height) : 5 }}%"></div>
                     <span class="text-[10px] text-gray-400 font-medium">{{ $day['day'] }}</span>
                 </div>
             @endforeach

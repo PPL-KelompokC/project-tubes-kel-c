@@ -17,13 +17,13 @@
         ['id' => 6, 'name' => 'Bamboo Toothbrush Set', 'description' => 'Set of 4 biodegradable bamboo toothbrushes.', 'points' => 150, 'category' => 'product', 'svgPath' => '<path d="M12 2v20"/><path d="M7 5c0-1.7 1.3-3 3-3h4c1.7 0 3 1.3 3 3"/><path d="M7 5c0 1.7 1.3 3 3 3h4c1.7 0 3-1.3 3-3"/>', 'svgColor' => 'text-teal-600 bg-teal-50', 'available' => true],
     ];
 
-    $transactions = $user->activities()->latest()->take(10)->get()->map(function($a) {
+    $transactions = $user->submissions()->where('status', 'verified')->latest()->take(10)->get()->map(function($s) {
         return [
-            'id' => $a->id,
-            'type' => $a->points_earned >= 0 ? 'earn' : 'spend',
-            'description' => 'Activity: ' . $a->activity_date,
-            'points' => $a->points_earned,
-            'date' => $a->activity_date,
+            'id' => $s->id,
+            'type' => 'earn',
+            'description' => 'Challenge: ' . $s->challenge->title,
+            'points' => $s->points_awarded,
+            'date' => $s->verified_at ? $s->verified_at->format('Y-m-d') : $s->updated_at->format('Y-m-d'),
             'category' => 'activity'
         ];
     });
@@ -31,8 +31,10 @@
 
 <div class="p-4 lg:p-6 max-w-5xl mx-auto space-y-5">
     <!-- Points balance card -->
-    <div class="eco-gradient rounded-3xl p-6 text-white eco-pattern relative overflow-hidden animate-bounce-in">
-        <div class="flex items-center justify-between gap-4">
+    <div class="rounded-3xl p-6 text-white relative overflow-hidden animate-bounce-in shadow-lg" style="background: linear-gradient(135deg, #15803d 0%, #047857 45%, #0369a1 100%);">
+        <!-- Decorative overlay circles -->
+        <div class="absolute inset-0 rounded-3xl" style="background-image: radial-gradient(circle at 15% 75%, rgba(52,211,153,0.18) 0%, transparent 55%), radial-gradient(circle at 85% 15%, rgba(56,189,248,0.15) 0%, transparent 55%);"></div>
+        <div class="relative z-10 flex items-center justify-between gap-4">
             <div>
                 <p class="text-green-200 text-sm font-medium">Your Balance</p>
                 <div class="flex items-end gap-2 mt-1">

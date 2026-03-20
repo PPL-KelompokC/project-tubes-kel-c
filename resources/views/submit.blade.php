@@ -30,8 +30,8 @@
         <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/5"></div>
     </div>
 
-    {{-- Already submitted --}}
-    @if($existingSubmission)
+    {{-- Already submitted (Verified or Pending) --}}
+    @if($existingSubmission && $existingSubmission->status !== 'rejected')
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center animate-count-in">
             <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -41,9 +41,7 @@
             <span class="inline-block text-xs font-bold px-3 py-1.5 rounded-full {{ $existingSubmission->statusColor() }}">
                 {{ $existingSubmission->statusLabel() }}
             </span>
-            @if($existingSubmission->ai_score)
-                <p class="text-xs text-gray-400 mt-2">AI confidence score: {{ $existingSubmission->ai_score }}%</p>
-            @endif
+
             <div class="mt-5">
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
@@ -52,7 +50,18 @@
             </div>
         </div>
     @else
-        {{-- Submit form --}}
+        {{-- Submit form (New or Rejected) --}}
+        @if($existingSubmission && $existingSubmission->status === 'rejected')
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3 animate-count-in">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500 flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                <div>
+                    <p class="text-sm font-bold text-red-800 mb-0.5">Submission Rejected</p>
+                    <p class="text-xs text-red-700">Your previous photo was not accepted. Reason: <strong>"{{ $existingSubmission->rejection_reason ?? 'No reason provided' }}"</strong></p>
+                    <p class="text-xs text-red-600 mt-1 italic">Please take a better photo and try again.</p>
+                </div>
+            </div>
+        @endif
+
         <form action="{{ route('challenges.submit.store', $challenge) }}" method="POST" enctype="multipart/form-data" id="submitForm">
             @csrf
 
@@ -64,7 +73,7 @@
                     <ul class="text-xs text-amber-700 space-y-0.5">
                         <li>• Must be taken <strong>NOW</strong> using your camera (no gallery)</li>
                         <li>• Photo must clearly show your eco action</li>
-                        <li>• Will be verified by AI + community</li>
+                        <li>• Will be manually verified by our admins</li>
                     </ul>
                 </div>
             </div>
@@ -73,13 +82,6 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
                 <h3 class="text-sm font-bold text-gray-900 mb-2">What to photograph:</h3>
                 <p class="text-sm text-gray-600 leading-relaxed">{{ $challenge->description }}</p>
-                @if($challenge->ai_keywords)
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        @foreach($challenge->ai_keywords as $kw)
-                            <span class="text-[10px] bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full font-medium">{{ $kw }}</span>
-                        @endforeach
-                    </div>
-                @endif
             </div>
 
             {{-- Camera capture --}}
@@ -124,7 +126,7 @@
             <div id="loadingState" class="hidden mt-4 bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center">
                 <div class="flex items-center justify-center gap-3">
                     <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                    <p class="text-sm font-semibold text-blue-700">Uploading… AI verification in progress</p>
+                    <p class="text-sm font-semibold text-blue-700">Uploading… Please wait.</p>
                 </div>
             </div>
         </form>

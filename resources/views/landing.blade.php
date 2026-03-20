@@ -11,9 +11,9 @@
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                            <img src="{{ asset('image/icon-siklim.png') }}" alt="Siklim" class="w-full h-full object-contain">
+                            <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde" class="w-full h-full object-contain">
                         </div>
-                        <span class="text-xl font-black text-gray-900 tracking-tight">Siklim</span>
+                        <span class="text-xl font-black text-gray-900 tracking-tight">TerraVerde</span>
                     </div>
                     <div class="hidden sm:ml-10 sm:flex sm:space-x-8">
                         <a href="#home" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-green-500 text-sm font-medium">Home</a>
@@ -217,9 +217,9 @@
                 <div class="col-span-1 md:col-span-1">
                     <div class="flex items-center gap-2.5 mb-6">
                         <div class="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                            <img src="{{ asset('image/icon-siklim.png') }}" alt="Siklim" class="w-full h-full object-contain">
+                            <img src="{{ asset('image/icon-terraverde.png') }}" alt="TerraVerde" class="w-full h-full object-contain">
                         </div>
-                        <span class="text-xl font-black tracking-tight">Siklim</span>
+                        <span class="text-xl font-black tracking-tight">TerraVerde</span>
                     </div>
                     <p class="text-gray-400 text-sm leading-relaxed">
                         Empowering people to take climate action through gamified daily challenges and community.
