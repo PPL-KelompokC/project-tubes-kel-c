@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Challenges list
     Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges');
+    Route::post('/challenges/{challenge}/quick', [ChallengeController::class, 'quickComplete'])->name('challenges.quick');
 
     // Challenge submission (camera capture + submit)
     Route::get('/challenges/{challenge}/submit',  [ChallengeSubmissionController::class, 'create'])->name('challenges.submit');

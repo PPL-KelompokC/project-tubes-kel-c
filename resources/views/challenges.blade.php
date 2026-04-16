@@ -87,7 +87,7 @@
         @foreach($filteredChallenges as $i => $challenge)
             @php 
                 $isCompleted = $challenge['status'] === 'completed';
-                $cat = collect($categories)->firstWhere('id', $challenge['category']);
+                $cat = collect($categories)->firstWhere('id', strtolower($challenge['category']));
             @endphp
             <div class="group bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-bounce-in" style="animation-delay: {{ $i * 0.05 }}s">
                 <!-- Card Image -->
@@ -102,8 +102,8 @@
                         </span>
                     </div>
                     <div class="absolute top-4 right-4">
-                        <span class="text-[10px] font-bold px-3 py-1.5 rounded-full {{ $difficultyColor[$challenge['difficulty']] }} backdrop-blur-md shadow-sm">
-                            {{ $challenge['difficulty'] }}
+                        <span class="text-[10px] font-bold px-3 py-1.5 rounded-full {{ $difficultyColor[strtolower($challenge['difficulty'])] ?? 'bg-gray-100 text-gray-700' }} backdrop-blur-md shadow-sm">
+                            {{ ucfirst($challenge['difficulty']) }}
                         </span>
                     </div>
 
@@ -155,10 +155,13 @@
                             Done!
                         </button>
                     @else
-                        <button class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-green-50 hover:shadow-green-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                            Mark Complete
-                        </button>
+                        <form action="{{ route('challenges.quick', $challenge['id']) }}" method="POST" class="m-0 p-0 w-full">
+                            @csrf
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-green-50 hover:shadow-green-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                Mark Complete
+                            </button>
+                        </form>
                     @endif
                 </div>
             </div>
