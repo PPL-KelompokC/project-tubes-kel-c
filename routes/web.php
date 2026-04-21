@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\EventController as AdminEvent;
 use App\Http\Controllers\Admin\ArticleController as AdminArticle;
 use App\Http\Controllers\Admin\ReferralController as AdminReferral;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmission;
+use App\Http\Controllers\Admin\FeedController as AdminFeed;
 
 // ── Public / Guest Only ──────────────────────────────────────────
 Route::get('/', LandingController::class)->name('landing');
@@ -42,6 +43,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('articles',   AdminArticle::class);
     Route::get('/referrals', [AdminReferral::class, 'index'])->name('referrals.index');
 
+    // Feed Management (Activity Feed Moderation)
+    Route::get('/feeds', [AdminFeed::class, 'index'])->name('feeds.index');
+    Route::get('/feeds/{feed}', [AdminFeed::class, 'show'])->name('feeds.show');
+    Route::post('/feeds/{feed}/hide', [AdminFeed::class, 'hide'])->name('feeds.hide');
+    Route::post('/feeds/{feed}/show', [AdminFeed::class, 'show_feed'])->name('feeds.show');
+    Route::delete('/feeds/{feed}', [AdminFeed::class, 'destroy'])->name('feeds.destroy');
+    Route::get('/feeds/filter/by-status', [AdminFeed::class, 'filterByStatus'])->name('feeds.filter');
+    Route::get('/feeds/search/query', [AdminFeed::class, 'search'])->name('feeds.search');
+
     // Submission moderation
     Route::get('/submissions', [AdminSubmission::class, 'index'])->name('submissions.index');
     Route::post('/submissions/{submission}/approve', [AdminSubmission::class, 'approve'])->name('submissions.approve');
@@ -61,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Challenges list
     Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges');
+    Route::post('/challenges/{challenge}/quick', [ChallengeController::class, 'quickComplete'])->name('challenges.quick');
 
     // Challenge submission (camera capture + submit)
     Route::get('/challenges/{challenge}/submit',  [ChallengeSubmissionController::class, 'create'])->name('challenges.submit');
