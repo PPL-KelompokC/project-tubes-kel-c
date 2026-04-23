@@ -14,6 +14,12 @@ class EventController extends Controller
         return view('admin.events.index', compact('events'));
     }
 
+    public function show(Event $event)
+    {
+        $event->load('user');
+        return view('admin.events.show', compact('event'));
+    }
+
     public function update(Request $request, Event $event)
     {
         $request->validate([
