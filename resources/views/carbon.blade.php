@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Carbon Tracker - EcoChallenge')
+@section('title', 'Carbon Tracker - TerraVerde')
 
 @section('content')
 @php
@@ -141,7 +141,7 @@
                     </span>
                     <span class="text-2xl font-bold text-green-200 mb-2">kg CO₂</span>
                 </div>
-                <p class="text-green-100 text-sm mt-2">Since joining EcoChallenge • Jan 2024</p>
+                <p class="text-green-100 text-sm mt-2">Since joining TerraVerde • Jan 2024</p>
                 <div class="mt-3 bg-white/20 backdrop-blur-sm rounded-xl p-3 inline-flex items-center gap-2">
                     @if($monthlyChangePct >= 0)
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-200"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>

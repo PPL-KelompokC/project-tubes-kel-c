@@ -12,12 +12,56 @@ class UserController extends Controller
     /**
      * Display a listing of all users
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('role', 'user')
-            ->latest()
-            ->paginate(15);
+        $query = User::where('role', 'user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(15);
+        
         return view('admin.users.index', compact('users'));
+    }
+
+    /**
+     * Export users to CSV
+     */
+    public function export()
+    {
+        $users = User::where('role', 'user')->latest()->get();
+        $filename = "users_data_" . date('Y-m-d') . ".csv";
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name', 'Email', 'Points', 'Streak', 'Carbon Saved (kg)', 'Joined At']);
+
+            foreach ($users as $user) {
+                fputcsv($handle, [
+                    $user->name,
+                    $user->email,
+                    $user->points,
+                    $user->streak,
+                    $user->carbon_saved,
+                    $user->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     /**

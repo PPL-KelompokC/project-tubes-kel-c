@@ -38,6 +38,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('challenges', AdminChallenge::class);
     Route::resource('badges',     AdminBadge::class);
     Route::resource('posts',      AdminPost::class);
+    Route::get('/users/export', [AdminUser::class, 'export'])->name('users.export');
     Route::resource('users',      AdminUser::class);
     Route::resource('events',     AdminEvent::class);
     Route::resource('articles',   AdminArticle::class);

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Profile - EcoChallenge')
+@section('title', 'My Profile - TerraVerde')
 
 @section('content')
 @php

@@ -9,7 +9,7 @@
         <!-- HEADER -->
         <div class="mb-8">
             <h2 class="text-3xl font-bold text-emerald-700">
-                ✏️ Edit Badge
+                Edit Badge
             </h2>
             <p class="text-sm text-slate-500 mt-1">
                 Update informasi badge
@@ -82,8 +82,9 @@
                 <div class="border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center hover:bg-emerald-50 transition cursor-pointer">
                     <input type="file" name="icon" class="hidden" onchange="previewImage(event)" id="upload">
 
-                    <label for="upload" class="cursor-pointer text-sm text-slate-500">
-                        📁 Klik untuk ganti icon
+                    <label for="upload" class="cursor-pointer text-sm text-slate-500 flex flex-col items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                        <span>Klik untuk ganti icon</span>
                     </label>
 
                     <img id="preview" class="mx-auto mt-3 w-16 h-16 hidden rounded-full border border-emerald-200 shadow"/>
@@ -100,16 +101,15 @@
 
             <!-- BUTTON -->
             <div class="flex justify-between items-center pt-4">
-
                 <a href="{{ route('admin.badges.index') }}"
                    class="text-sm text-slate-500 hover:text-emerald-600 transition">
                     ← Kembali
                 </a>
 
-                <button class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl shadow-lg">
-                    💾 Update Badge
+                <button class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Update Badge
                 </button>
-
             </div>
 
         </form>

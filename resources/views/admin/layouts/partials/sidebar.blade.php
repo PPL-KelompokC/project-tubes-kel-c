@@ -42,7 +42,7 @@
                 @include('layouts.partials.icons.activity')
                 Activity Feeds
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 {{ Request::routeIs('admin.events.*') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
+            <a href="{{ route('admin.events.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 {{ Request::routeIs('admin.events.*') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
                 @include('layouts.partials.icons.map')
                 Events
             </a>

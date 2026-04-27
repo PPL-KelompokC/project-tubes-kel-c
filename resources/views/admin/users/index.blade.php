@@ -8,22 +8,22 @@
 <div class="space-y-6" x-data="userManagement()">
     <!-- Header Actions -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div class="relative max-w-md w-full">
+        <form action="{{ route('admin.users.index') }}" method="GET" class="relative max-w-md w-full">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
-            <input type="text" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-200 shadow-sm">
-        </div>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-200 shadow-sm" onchange="this.form.submit()">
+        </form>
         
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-200 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Create User
             </a>
-            <button class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-50 transition-200 shadow-sm">
+            <a href="{{ route('admin.users.export') }}" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-50 transition-200 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Export CSV
-            </button>
+            </a>
         </div>
     </div>
 
@@ -108,7 +108,7 @@
         </div>
         @if($users->hasPages())
             <div class="px-8 py-6 bg-slate-50/50 border-t border-slate-100">
-                {{ $users->links() }}
+                {{ $users->withQueryString()->links() }}
             </div>
         @endif
     </div>
