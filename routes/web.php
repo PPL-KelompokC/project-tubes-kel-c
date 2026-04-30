@@ -10,6 +10,7 @@ use App\Http\Controllers\ChallengeSubmissionController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\LearnController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\ChallengeController as AdminChallenge;
 use App\Http\Controllers\Admin\BadgeController as AdminBadge;
@@ -92,7 +93,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');
     Route::get('/rewards', fn() => view('rewards'))->name('rewards');
-    Route::get('/learn',  fn() => view('learn'))->name('learn');
+    Route::get('/learn',  [LearnController::class, 'learn'])->name('learn');
+    Route::get('/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
     Route::get('/referral', fn() => view('referral'))->name('referral');
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
 
