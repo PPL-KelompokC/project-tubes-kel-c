@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Refer Friends - EcoChallenge')
+@section('title', 'Refer Friends - TerraVerde')
 
 @section('content')
 @php
@@ -21,7 +21,7 @@
 
     $activereferrals = collect($referrals)->where('status', 'active');
     $totalEarned = $activereferrals->sum('pointsEarned');
-    $referralLink = "https://ecochallenge.app/join?ref=" . $currentUser['referralCode'];
+    $referralLink = "https://TerraVerde.app/join?ref=" . $currentUser['referralCode'];
 @endphp
 
 <div class="p-4 lg:p-6 max-w-4xl mx-auto space-y-6">

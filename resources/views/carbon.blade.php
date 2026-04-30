@@ -1,37 +1,122 @@
 @extends('layouts.app')
 
-@section('title', 'Carbon Tracker - EcoChallenge')
+@section('title', 'Carbon Tracker - TerraVerde')
 
 @section('content')
 @php
     $user = Auth::user();
-    $totalCO2 = $user->carbon_saved;
+    
+    // Total Carbon accumulated from verified daily challenges
+    $totalCO2 = (float) \DB::table('challenge_submissions')
+        ->where('challenge_submissions.user_id', $user->id)
+        ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+        ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+        ->sum('challenges.co2_saved');
+
     $treesEquivalent = floor($totalCO2 / 21.7);
     $drivingMiles = floor($totalCO2 * 2.5);
     $electricDays = floor($totalCO2 * 0.8);
 
-    $weeklyData = [];
-    $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    $startOfWeek = now()->startOfWeek();
-    
-    foreach ($days as $i => $dayName) {
-        $date = $startOfWeek->copy()->addDays($i);
-        $activity = $user->submissions()->where('status', 'verified')->whereDate('created_at', $date->format('Y-m-d'))->first();
+    $viewMode = request('view', 'weekly');
+    $graphData = [];
+
+    if ($viewMode === 'monthly') {
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthlyCo2 = (float) \DB::table('challenge_submissions')
+                ->where('challenge_submissions.user_id', $user->id)
+                ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+                ->whereYear('challenge_submissions.created_at', $date->year)
+                ->whereMonth('challenge_submissions.created_at', $date->month)
+                ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+                ->sum('challenges.co2_saved');
+                
+            $graphData[] = [
+                'label' => $date->format('M'),
+                'co2' => $monthlyCo2
+            ];
+        }
+    } else {
+        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        $startOfWeek = now()->startOfWeek();
         
-        $weeklyData[] = [
-            'day' => $dayName,
-            'co2' => $activity ? (float)$activity->challenge->co2_saved : 0
-        ];
+        foreach ($days as $i => $dayName) {
+            $date = $startOfWeek->copy()->addDays($i);
+            $dailyCo2 = (float) \DB::table('challenge_submissions')
+                ->where('challenge_submissions.user_id', $user->id)
+                ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+                ->whereDate('challenge_submissions.created_at', $date->format('Y-m-d'))
+                ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+                ->sum('challenges.co2_saved');
+                
+            $graphData[] = [
+                'label' => $dayName,
+                'co2' => $dailyCo2
+            ];
+        }
     }
 
-    $categoryBreakdown = [
-        ['name' => 'Transport', 'value' => 35, 'color' => '#3b82f6', 'co2' => 49.8],
-        ['name' => 'Food', 'value' => 25, 'color' => '#22c55e', 'co2' => 35.6],
-        ['name' => 'Waste', 'value' => 15, 'color' => '#f97316', 'co2' => 21.4],
-        ['name' => 'Energy', 'value' => 12, 'color' => '#eab308', 'co2' => 17.1],
-        ['name' => 'Nature', 'value' => 8, 'color' => '#10b981', 'co2' => 11.4],
-        ['name' => 'Water', 'value' => 5, 'color' => '#06b6d4', 'co2' => 7.3],
+    // This month vs last month CO2
+    $thisMonthCO2 = (float) \DB::table('challenge_submissions')
+        ->where('challenge_submissions.user_id', $user->id)
+        ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+        ->whereYear('challenge_submissions.created_at', now()->year)
+        ->whereMonth('challenge_submissions.created_at', now()->month)
+        ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+        ->sum('challenges.co2_saved');
+
+    $lastMonthCO2 = (float) \DB::table('challenge_submissions')
+        ->where('challenge_submissions.user_id', $user->id)
+        ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+        ->whereYear('challenge_submissions.created_at', now()->subMonth()->year)
+        ->whereMonth('challenge_submissions.created_at', now()->subMonth()->month)
+        ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+        ->sum('challenges.co2_saved');
+
+    // Percentage change vs last month
+    if ($lastMonthCO2 > 0) {
+        $monthlyChangePct = round((($thisMonthCO2 - $lastMonthCO2) / $lastMonthCO2) * 100);
+    } elseif ($thisMonthCO2 > 0) {
+        $monthlyChangePct = 100; // first time saving this month
+    } else {
+        $monthlyChangePct = 0;
+    }
+
+    $rawCategories = \DB::table('challenge_submissions')
+        ->where('challenge_submissions.user_id', $user->id)
+        ->whereIn('challenge_submissions.status', ['verified', 'pending_admin'])
+        ->join('challenges', 'challenge_submissions.challenge_id', '=', 'challenges.id')
+        ->selectRaw('challenges.category, SUM(challenges.co2_saved) as co2')
+        ->groupBy('challenges.category')
+        ->get();
+
+    $categoryMeta = [
+        'transport' => ['color' => '#3b82f6', 'name' => 'Transport'],
+        'food'      => ['color' => '#22c55e', 'name' => 'Food'],
+        'waste'     => ['color' => '#f97316', 'name' => 'Waste'],
+        'energy'    => ['color' => '#eab308', 'name' => 'Energy'],
+        'nature'    => ['color' => '#10b981', 'name' => 'Nature'],
+        'lifestyle' => ['color' => '#8b5cf6', 'name' => 'Lifestyle'],
+        'water'     => ['color' => '#06b6d4', 'name' => 'Water'],
     ];
+
+    $categoryBreakdown = [];
+    foreach ($rawCategories as $cat) {
+        $c = strtolower($cat->category);
+        $meta = $categoryMeta[$c] ?? ['color' => '#94a3b8', 'name' => ucfirst($c)];
+        $pct = $totalCO2 > 0 ? round(($cat->co2 / $totalCO2) * 100) : 0;
+        
+        $categoryBreakdown[] = [
+            'name' => $meta['name'],
+            'value' => $pct,
+            'color' => $meta['color'],
+            'co2' => round($cat->co2, 1)
+        ];
+    }
+    
+    usort($categoryBreakdown, function($a, $b) {
+        return $b['co2'] <=> $a['co2'];
+    });
 
     $milestones = [
         ['label' => 'Eco Rookie (10 kg saved)', 'target' => 10, 'svgPath' => '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>', 'color' => 'bg-green-400'],
@@ -56,11 +141,23 @@
                     </span>
                     <span class="text-2xl font-bold text-green-200 mb-2">kg CO₂</span>
                 </div>
-                <p class="text-green-100 text-sm mt-2">Since joining EcoChallenge • Jan 2024</p>
+                <p class="text-green-100 text-sm mt-2">Since joining TerraVerde • Jan 2024</p>
                 <div class="mt-3 bg-white/20 backdrop-blur-sm rounded-xl p-3 inline-flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-200"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                    <span class="text-sm font-semibold text-white">+12.3 kg this month</span>
-                    <span class="text-green-200 text-xs">(+34% vs last month)</span>
+                    @if($monthlyChangePct >= 0)
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-200"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-300"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+                    @endif
+                    <span class="text-sm font-semibold text-white">
+                        {{ $thisMonthCO2 > 0 ? '+' : '' }}{{ round($thisMonthCO2, 1) }} kg this month
+                    </span>
+                    @if($lastMonthCO2 > 0 || $thisMonthCO2 > 0)
+                        <span class="text-green-200 text-xs">
+                            ({{ $monthlyChangePct >= 0 ? '+' : '' }}{{ $monthlyChangePct }}% vs last month)
+                        </span>
+                    @else
+                        <span class="text-green-200 text-xs">(no data yet)</span>
+                    @endif
                 </div>
             </div>
 
@@ -91,23 +188,23 @@
                 <p class="text-xs text-gray-500 mt-0.5">Track your daily environmental impact</p>
             </div>
             <div class="flex gap-1 bg-gray-100 p-1 rounded-xl">
-                <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-green-700 shadow-sm">Weekly</button>
-                <button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-500">Monthly</button>
+                <a href="{{ route('carbon', ['view' => 'weekly']) }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold {{ request('view', 'weekly') === 'weekly' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Weekly</a>
+                <a href="{{ route('carbon', ['view' => 'monthly']) }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold {{ request('view') === 'monthly' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">Monthly</a>
             </div>
         </div>
 
         <div class="h-56 w-full flex items-end justify-between gap-2">
-            @php $maxCo2 = collect($weeklyData)->max('co2') ?: 1; @endphp
-            @foreach($weeklyData as $day)
+            @php $maxCo2 = collect($graphData)->max('co2') ?: 1; @endphp
+            @foreach($graphData as $point)
                 @php 
-                    $height = round(($day['co2'] / $maxCo2) * 100);
+                    $height = round(($point['co2'] / $maxCo2) * 100);
                 @endphp
                 <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-900 text-white text-[10px] px-2 py-1 rounded-lg z-10 whitespace-nowrap">
-                        {{ $day['co2'] }}kg CO₂
+                        {{ $point['co2'] }}kg CO₂
                     </div>
-                    <div class="w-full bg-green-100 rounded-t-lg transition-all hover:bg-green-500 group-hover:animate-pulse" style="height: {{ $day['co2'] > 0 ? max(10, $height) : 5 }}%"></div>
-                    <span class="text-[10px] text-gray-400 font-medium">{{ $day['day'] }}</span>
+                    <div class="w-full bg-green-100 rounded-t-lg transition-all hover:bg-green-500 group-hover:animate-pulse" style="height: {{ $point['co2'] > 0 ? max(10, $height) : 5 }}%"></div>
+                    <span class="text-[10px] text-gray-400 font-medium">{{ $point['label'] }}</span>
                 </div>
             @endforeach
         </div>

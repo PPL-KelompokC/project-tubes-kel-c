@@ -8,7 +8,7 @@
     ] : null;
 
     $pageTitles = [
-        'landing' => ['title' => 'EcoChallenge', 'subtitle' => 'SDG 13 - Climate Action'],
+        'landing' => ['title' => 'TerraVerde', 'subtitle' => 'SDG 13 - Climate Action'],
         'login' => ['title' => 'Login', 'subtitle' => 'Welcome back to Climate Tracker'],
         'register' => ['title' => 'Register', 'subtitle' => 'Join the eco-movement'],
         'dashboard' => ['title' => 'Daily Dashboard', 'subtitle' => "Today's climate challenges"],
@@ -29,7 +29,7 @@
     ];
 
     $currentRoute = Route::currentRouteName() ?? 'dashboard';
-    $page = $pageTitles[$currentRoute] ?? ['title' => 'EcoChallenge', 'subtitle' => ''];
+    $page = $pageTitles[$currentRoute] ?? ['title' => 'TerraVerde', 'subtitle' => ''];
     $unread = 3;
 @endphp
 
