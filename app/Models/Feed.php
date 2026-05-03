@@ -35,6 +35,22 @@ class Feed extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the comments for the feed post
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Get the likes for the feed post
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
     // ── Scopes ─────────────────────────────────────────────────────
 
     /**

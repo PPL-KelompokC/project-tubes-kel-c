@@ -120,6 +120,79 @@
                         <p class="text-3xl font-bold text-slate-900 mt-1">{{ $feed->comments_count }}</p>
                     </div>
                 </div>
+
+                <!-- Likers List -->
+                @if($feed->likes && $feed->likes->count() > 0)
+                <div class="mt-6 pt-6 border-t border-slate-200">
+                    <h3 class="text-sm font-semibold text-slate-600 uppercase mb-3">Users who liked this post</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($feed->likes as $like)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-medium rounded-full border border-red-100">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                                {{ $like->user->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <!-- Comments & Replies Tree -->
+            <div class="bg-white rounded-2xl border border-slate-200 card-shadow p-6">
+                <h2 class="text-lg font-bold text-slate-900 mb-6">Comments & Replies Tree</h2>
+                
+                @if($feed->comments && $feed->comments->count() > 0)
+                    <div class="space-y-6">
+                        @foreach($feed->comments as $comment)
+                            <!-- Parent Comment -->
+                            <div class="relative">
+                                <div class="flex gap-4">
+                                    <img src="{{ $comment->user->avatar ?? 'https://via.placeholder.com/40' }}" alt="avatar" class="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 flex-shrink-0">
+                                    <div class="flex-1 bg-slate-50 border border-slate-200 rounded-xl rounded-tl-none p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="font-bold text-slate-900">{{ $comment->user->name }}</span>
+                                            <span class="text-xs text-slate-500">{{ $comment->created_at->format('d M, H:i') }}</span>
+                                        </div>
+                                        @if($comment->content)
+                                            <p class="text-sm text-slate-700 break-words mb-2">{!! $comment->formatted_content !!}</p>
+                                        @endif
+                                        @if($comment->image)
+                                            <img src="{{ $comment->image }}" class="rounded-lg max-h-40 object-cover border border-slate-200" alt="Comment Image">
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Replies -->
+                                @if($comment->replies && $comment->replies->count() > 0)
+                                    <div class="mt-4 ml-12 space-y-4">
+                                        @foreach($comment->replies as $reply)
+                                            <div class="flex gap-3 relative before:absolute before:-left-8 before:top-4 before:w-6 before:h-px before:bg-slate-300">
+                                                <div class="absolute -left-8 -top-8 w-px h-12 bg-slate-300"></div>
+                                                <img src="{{ $reply->user->avatar ?? 'https://via.placeholder.com/32' }}" alt="avatar" class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100 flex-shrink-0 z-10">
+                                                <div class="flex-1 bg-white border border-slate-200 rounded-xl rounded-tl-none p-3">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <span class="text-sm font-bold text-slate-900">{{ $reply->user->name }}</span>
+                                                        <span class="text-[10px] text-slate-500">{{ $reply->created_at->format('d M, H:i') }}</span>
+                                                    </div>
+                                                    @if($reply->content)
+                                                        <p class="text-xs text-slate-700 break-words">{!! $reply->formatted_content !!}</p>
+                                                    @endif
+                                                    @if($reply->image)
+                                                        <img src="{{ $reply->image }}" class="rounded-lg max-h-24 object-cover border border-slate-200 mt-2" alt="Reply Image">
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <p class="text-slate-500">No comments have been posted yet.</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -152,7 +225,7 @@
                     </button>
                 </form>
                 @else
-                <form action="{{ route('admin.feeds.show', $feed->id) }}" method="POST">
+                <form action="{{ route('admin.feeds.unhide', $feed->id) }}" method="POST">
                     @csrf
                     <button 
                         type="submit"
