@@ -13,7 +13,9 @@ class FeedController extends Controller
      */
     public function index()
     {
-        $feeds = Feed::with('user')
+        $feeds = Feed::with(['user', 'likes.user', 'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+            }])
             ->latest()
             ->paginate(15);
 
@@ -23,7 +25,13 @@ class FeedController extends Controller
             'hidden' => Feed::hidden()->count(),
         ];
 
-        return view('admin.feeds.index', compact('feeds', 'stats'));
+        $members = \App\Models\User::where('role', 'user')
+            ->withCount('feeds')
+            ->orderByDesc('feeds_count')
+            ->take(10)
+            ->get();
+
+        return view('admin.feeds.index', compact('feeds', 'stats', 'members'));
     }
 
     /**
@@ -31,7 +39,13 @@ class FeedController extends Controller
      */
     public function show(Feed $feed)
     {
-        $feed->load('user');
+        $feed->load([
+            'user', 
+            'likes.user', 
+            'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+            }
+        ]);
         return view('admin.feeds.show', compact('feed'));
     }
 
@@ -100,7 +114,9 @@ class FeedController extends Controller
     {
         $query = $request->get('q', '');
 
-        $feeds = Feed::with('user')
+        $feeds = Feed::with(['user', 'likes.user', 'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+            }])
             ->where('caption', 'like', "%{$query}%")
             ->orWhereHas('user', function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%");
@@ -114,6 +130,12 @@ class FeedController extends Controller
             'hidden' => Feed::hidden()->count(),
         ];
 
-        return view('admin.feeds.index', compact('feeds', 'stats', 'query'));
+        $members = \App\Models\User::where('role', 'user')
+            ->withCount('feeds')
+            ->orderByDesc('feeds_count')
+            ->take(10)
+            ->get();
+
+        return view('admin.feeds.index', compact('feeds', 'stats', 'query', 'members'));
     }
 }

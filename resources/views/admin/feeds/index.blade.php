@@ -5,287 +5,386 @@
 @section('page_subtitle', 'Monitor and moderate all user activity feeds across the platform.')
 
 @section('content')
-<div class="p-6 space-y-6">
-    <!-- Header Section -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-900">Activity Feed Management</h1>
-            <p class="text-sm text-slate-600 mt-1">Review, hide, or delete user activity feeds</p>
+<div class="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+    <!-- Left Sidebar: Activity & Member List -->
+    <div class="w-full lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-24">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-800 text-sm">Activity</h3>
+            </div>
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                <span>Member list <span class="text-slate-400 font-normal">{{ $members->count() }}</span></span>
+                <span>Activities</span>
+            </div>
+            <div class="max-h-[60vh] overflow-y-auto custom-scrollbar p-2">
+                @forelse($members as $member)
+                    <div class="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-colors">
+                        <div class="flex items-center gap-3">
+                            @if($member->avatar)
+                                <img src="{{ $member->avatar }}" alt="{{ $member->name }}" class="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-50">
+                            @else
+                                @php
+                                    $colors = ['bg-orange-500', 'bg-green-500', 'bg-purple-500', 'bg-blue-900', 'bg-emerald-500'];
+                                    $color = $colors[$loop->index % count($colors)];
+                                @endphp
+                                <div class="w-8 h-8 rounded-full {{ $color }} flex items-center justify-center text-white font-bold text-xs">
+                                    {{ substr($member->name, 0, 1) }}
+                                </div>
+                            @endif
+                            <span class="text-sm font-medium text-slate-700 truncate max-w-[100px]" title="{{ $member->name }}">{{ $member->name }}</span>
+                        </div>
+                        <span class="text-xs font-bold text-slate-400">{{ $member->feeds_count }}</span>
+                    </div>
+                @empty
+                    <div class="p-4 text-center text-sm text-slate-500">No members found</div>
+                @endforelse
+            </div>
+            <div class="p-3 border-t border-slate-100 text-center text-xs text-slate-400 font-medium bg-slate-50">
+                Showing top active members
+            </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                </div>
-                <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Total</span>
-            </div>
-            <p class="text-sm font-medium text-slate-600">Total Feeds</p>
-            <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $stats['total'] }}</h3>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
-            </div>
-            <p class="text-sm font-medium text-slate-600">Active Posts</p>
-            <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $stats['active'] }}</h3>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.658 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                </div>
-                <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-full">Hidden</span>
-            </div>
-            <p class="text-sm font-medium text-slate-600">Hidden Posts</p>
-            <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ $stats['hidden'] }}</h3>
-        </div>
-    </div>
-
-    <!-- Filters & Search -->
-    <div class="bg-white rounded-2xl border border-slate-200 card-shadow p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Search -->
-            <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </span>
-                <form method="GET" action="{{ route('admin.feeds.search') }}" class="flex gap-2">
+    <!-- Main Content: Feeds -->
+    <div class="flex-1 max-w-3xl space-y-6">
+        <!-- Top Controls -->
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex-1 relative">
+                <form method="GET" action="{{ route('admin.feeds.search') }}" class="flex">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </span>
                     <input 
                         type="text" 
                         name="q" 
-                        placeholder="Search by user name or caption..." 
+                        placeholder="Search post by...." 
                         value="{{ $query ?? '' }}"
-                        class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-200"
+                        class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
                     />
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-200">
-                        Search
-                    </button>
                 </form>
             </div>
+            <button class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+                Sort
+            </button>
+        </div>
 
-            <!-- Status Filter -->
-            <div class="flex gap-2">
-                <a href="{{ route('admin.feeds.index') }}" class="px-4 py-2 bg-slate-100 text-slate-900 rounded-lg font-medium hover:bg-slate-200 transition-200 {{ !isset($status) || $status === 'all' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : '' }}">
-                    All Posts
+        <!-- Filter Tabs & New Post Button -->
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div class="flex gap-6">
+                <a href="{{ route('admin.feeds.index') }}" class="flex items-center gap-2 pb-2 border-b-2 {{ !isset($status) || $status === 'all' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700' }} font-bold text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    All Post <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded-md">{{ $stats['total'] }}</span>
                 </a>
-                <a href="{{ route('admin.feeds.filter', ['status' => 'active']) }}" class="px-4 py-2 bg-slate-100 text-slate-900 rounded-lg font-medium hover:bg-slate-200 transition-200 {{ isset($status) && $status === 'active' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : '' }}">
-                    Active
-                </a>
-                <a href="{{ route('admin.feeds.filter', ['status' => 'hidden']) }}" class="px-4 py-2 bg-slate-100 text-slate-900 rounded-lg font-medium hover:bg-slate-200 transition-200 {{ isset($status) && $status === 'hidden' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : '' }}">
-                    Hidden
+                <a href="#" class="flex items-center gap-2 pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-bold text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Media <span class="bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-md">0</span>
                 </a>
             </div>
+            
+            <button onclick="document.getElementById('composerSection').classList.toggle('hidden')" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full transition-all shadow-sm flex items-center gap-1">
+                New Post +
+            </button>
         </div>
-    </div>
 
-    <!-- Alert Messages -->
-    @if($message = session('success'))
-    <div class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
-        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <div>
-            <p class="font-medium text-green-900">{{ $message }}</p>
-        </div>
-    </div>
-    @endif
-
-    @if($errors->any())
-    <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
-        <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M9 5H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2h-4m0 0V3a2 2 0 00-2-2h-2a2 2 0 00-2 2v2z"/></svg>
-        <div>
-            <p class="font-medium text-red-900">Error occurred while processing your request</p>
-        </div>
-    </div>
-    @endif
-
-    <!-- Feeds Table -->
-    <div class="bg-white rounded-2xl border border-slate-200 card-shadow overflow-hidden">
-        @if($feeds->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">User</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Caption</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Media</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Status</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Engagement</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Posted</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @foreach($feeds as $feed)
-                        <tr class="hover:bg-slate-50 transition-200">
-                            <!-- User -->
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <img 
-                                        src="{{ $feed->user->avatar ?? 'https://via.placeholder.com/100' }}" 
-                                        alt="{{ $feed->user->name }}"
-                                        class="w-10 h-10 rounded-full object-cover"
-                                    />
-                                    <div>
-                                        <p class="font-medium text-slate-900">{{ $feed->user->name }}</p>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Caption -->
-                            <td class="px-6 py-4">
-                                <p class="text-sm text-slate-600 line-clamp-2">{{ Str::limit($feed->caption, 100) }}</p>
-                            </td>
-
-                            <!-- Media -->
-                            <td class="px-6 py-4">
-                                @if($feed->media && count($feed->media) > 0)
-                                    <div class="flex items-center gap-2">
-                                        @foreach($feed->media as $index => $media)
-                                            @if($index < 2)
-                                                <div class="relative w-10 h-10 rounded-lg overflow-hidden border border-slate-200">
-                                                    <img 
-                                                        src="{{ $media['url'] ?? $media }}" 
-                                                        alt="Media"
-                                                        class="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                        @if(count($feed->media) > 2)
-                                            <span class="text-xs font-medium text-slate-500">+{{ count($feed->media) - 2 }} more</span>
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="text-xs text-slate-400">No media</span>
-                                @endif
-                            </td>
-
-                            <!-- Status -->
-                            <td class="px-6 py-4">
-                                @if($feed->status === 'active')
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                                        <span class="w-2 h-2 bg-green-600 rounded-full"></span>
-                                        Active
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">
-                                        <span class="w-2 h-2 bg-orange-600 rounded-full"></span>
-                                        Hidden
-                                    </span>
-                                @endif
-                            </td>
-
-                            <!-- Engagement -->
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3 text-sm">
-                                    <div class="flex items-center gap-1 text-slate-600">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                        {{ $feed->likes_count }}
-                                    </div>
-                                    <div class="flex items-center gap-1 text-slate-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                        {{ $feed->comments_count }}
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Posted -->
-                            <td class="px-6 py-4">
-                                <div class="text-sm">
-                                    <p class="font-medium text-slate-900">{{ $feed->created_at->format('M d, Y') }}</p>
-                                    <p class="text-xs text-slate-500">{{ $feed->created_at->diffForHumans() }}</p>
-                                </div>
-                            </td>
-
-                            <!-- Actions -->
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2">
-                                    <!-- View Detail -->
-                                    <a 
-                                        href="{{ route('admin.feeds.show', $feed->id) }}"
-                                        class="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-200"
-                                        title="View Details"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </a>
-
-                                    <!-- Hide/Show Toggle -->
-                                    @if($feed->status === 'active')
-                                        <form action="{{ route('admin.feeds.hide', $feed->id) }}" method="POST" class="inline" onsubmit="return confirm('Hide this post?')">
-                                            @csrf
-                                            <button 
-                                                type="submit"
-                                                class="p-2 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-200"
-                                                title="Hide Post"
-                                            >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0m7.111 0a10.05 10.05 0 01-15.937 4.803 10.05 10.05 0 0115.937-4.803z M9.73 12a2.25 2.25 0 100 2.25M3 3l18 18"/></svg>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('admin.feeds.show', $feed->id) }}" method="POST" class="inline" onsubmit="return confirm('Show this post?')">
-                                            @csrf
-                                            @method('POST')
-                                            <button 
-                                                type="submit"
-                                                class="p-2 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-200"
-                                                title="Show Post"
-                                            >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    <!-- Delete -->
-                                    <form action="{{ route('admin.feeds.destroy', $feed->id) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete this post? This action cannot be undone.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button 
-                                            type="submit"
-                                            class="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-200"
-                                            title="Delete Post"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                <div class="text-sm text-slate-600">
-                    @if($feeds->total() > 0)
-                        Showing <span class="font-medium">{{ ($feeds->currentPage() - 1) * $feeds->perPage() + 1 }}</span> to <span class="font-medium">{{ ($feeds->currentPage() - 1) * $feeds->perPage() + $feeds->count() }}</span> of <span class="font-medium">{{ $feeds->total() }}</span> results
-                    @else
-                        No results
-                    @endif
-                </div>
-                <div class="flex gap-2">
-                    {{ $feeds->links() }}
-                </div>
-            </div>
-        @else
-            <!-- Empty State -->
-            <div class="px-6 py-12 text-center">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                </div>
-                <h3 class="text-lg font-semibold text-slate-900 mb-1">No feeds found</h3>
-                <p class="text-sm text-slate-600">No activity feeds match your current filters.</p>
+        <!-- Alerts -->
+        @if(session('success'))
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <p class="text-sm text-emerald-700 font-medium">{{ session('success') }}</p>
             </div>
         @endif
+
+        <!-- Composer Section (Hidden by default) -->
+        <div id="composerSection" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hidden transition-all">
+            <form action="{{ route('feed.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </div>
+                    <div class="flex-1 border border-slate-200 rounded-2xl p-3 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
+                        <textarea
+                            name="caption"
+                            placeholder="What do you want to announce?....."
+                            class="w-full text-sm bg-transparent border-none resize-none focus:ring-0 p-0"
+                            rows="3"
+                            required
+                        >{{ old('caption') }}</textarea>
+                        
+                        <div id="mediaPreviewAdmin" class="mt-3 grid grid-cols-2 gap-2 hidden">
+                            <template id="mediaTemplateAdmin">
+                                <div class="relative rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                                    <img class="w-full h-24 object-cover" />
+                                    <button type="button" class="absolute top-1 right-1 bg-rose-500 text-white rounded-full p-1 hover:bg-rose-600" onclick="removeMediaAdmin(this)">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between pl-14">
+                    <label class="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer" title="Add Image">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <input type="file" name="media[]" accept="image/*,video/*" multiple class="hidden" onchange="handleMediaSelectAdmin(this)"/>
+                    </label>
+                    
+                    <button type="submit" class="bg-emerald-400 hover:bg-emerald-500 text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all flex items-center gap-2 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                        Post
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <h2 class="text-lg font-bold text-slate-800 pt-2">Today</h2>
+
+        <!-- Feed List -->
+        <div class="space-y-6 pb-10">
+            @forelse($feeds as $feed)
+                <div class="bg-white rounded-3xl border {{ $feed->status === 'hidden' ? 'border-orange-300 opacity-70' : 'border-slate-100' }} shadow-sm overflow-visible relative">
+                    
+                    @if($feed->status === 'hidden')
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-orange-100 text-orange-700 text-[10px] font-bold px-3 py-1 rounded-full border border-orange-200 z-10 shadow-sm">
+                            HIDDEN POST
+                        </div>
+                    @endif
+
+                    <!-- Header -->
+                    <div class="flex items-start justify-between p-5 pb-3">
+                        <div class="flex items-center gap-3">
+                            @if($feed->user->avatar)
+                                <img src="{{ $feed->user->avatar }}" alt="{{ $feed->user->name }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-50" />
+                            @else
+                                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold text-lg">
+                                    {{ substr($feed->user->name, 0, 1) }}
+                                </div>
+                            @endif
+                            <div>
+                                <h3 class="font-bold text-slate-800 leading-tight">{{ $feed->user->name }}</h3>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    @if($feed->feed_type === 'challenge_complete')
+                                        <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                            Challenge Complete
+                                        </span>
+                                    @elseif($feed->feed_type === 'badge_earned')
+                                        <span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            🏆 Badge Earned
+                                        </span>
+                                    @endif
+                                    <span class="text-xs text-slate-400">{{ $feed->created_at->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" @click.outside="open = false" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+                            </button>
+                            <div x-show="open" style="display: none;" class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-20"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95">
+                                
+                                <a href="{{ route('admin.feeds.show', $feed->id) }}" class="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                                    View Details
+                                </a>
+
+                                @if($feed->status === 'active')
+                                    <form action="{{ route('admin.feeds.hide', $feed->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 font-medium">
+                                            Hide Post
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('admin.feeds.unhide', $feed->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 font-medium">
+                                            Show Post
+                                        </button>
+                                    </form>
+                                @endif
+
+                                <div class="h-px bg-slate-100 my-1"></div>
+
+                                <button type="button" onclick="confirmDeleteFeed({{ $feed->id }})" class="block w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-medium">
+                                    Delete Post
+                                </button>
+                                <form id="deleteForm-{{ $feed->id }}" action="{{ route('admin.feeds.destroy', $feed->id) }}" method="POST" style="display: none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="px-5 pb-3">
+                        <p class="text-slate-800 text-[15px] leading-relaxed break-words">{!! nl2br(e($feed->caption)) !!}</p>
+                    </div>
+
+                    <!-- Media -->
+                    @if($feed->media && count($feed->media) > 0)
+                        <div class="px-5 pb-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                @foreach($feed->media as $media)
+                                    @php
+                                        $url = is_array($media) ? ($media['url'] ?? $media) : $media;
+                                        $type = is_array($media) ? ($media['type'] ?? 'image') : 'image';
+                                    @endphp
+                                    @if($type === 'video')
+                                        <video controls class="w-full h-64 object-cover rounded-2xl bg-slate-100 border border-slate-200">
+                                            <source src="{{ $url }}" />
+                                        </video>
+                                    @else
+                                        <img src="{{ $url }}" class="w-full h-64 object-cover rounded-2xl border border-slate-200" />
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Context Card (e.g. Points earned) -->
+                    @if($feed->feed_type === 'challenge_complete' || $feed->feed_type === 'badge_earned')
+                    <div class="px-5 pb-4">
+                        <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between">
+                            <div class="flex items-center gap-4 text-xs font-bold">
+                                @if($feed->feed_type === 'challenge_complete')
+                                    <span class="text-amber-500 flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                        +50 pts
+                                    </span>
+                                    <span class="text-emerald-600 flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                        Eco Action
+                                    </span>
+                                @else
+                                    <span class="text-amber-600 flex items-center gap-1 text-sm">
+                                        🏅 Badge Master
+                                    </span>
+                                    <span class="text-slate-500 font-medium">+300 XP</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Footer / Engagement -->
+                    <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                        <div class="flex items-center gap-6">
+                            <button class="flex items-center gap-2 hover:text-rose-500 transition-colors">
+                                <svg class="w-5 h-5 {{ $feed->likes_count > 0 ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                <span class="font-medium {{ $feed->likes_count > 0 ? 'text-rose-500' : '' }}">{{ $feed->likes_count ?: '' }}</span>
+                            </button>
+                            <button class="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                <span class="font-medium">{{ $feed->comments_count ?: '' }}</span>
+                            </button>
+                        </div>
+                        <button class="flex items-center gap-2 hover:text-slate-700 transition-colors font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <!-- Empty State -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">No Activity Found</h3>
+                    <p class="text-sm text-slate-500">There are no posts to display in the feed yet.</p>
+                </div>
+            @endforelse
+
+            <!-- Pagination -->
+            @if($feeds->hasPages())
+                <div class="pt-4">
+                    {{ $feeds->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 </div>
+
+<script>
+function handleMediaSelectAdmin(input) {
+    const files = input.files;
+    const preview = document.getElementById('mediaPreviewAdmin');
+    const template = document.getElementById('mediaTemplateAdmin');
+    
+    preview.innerHTML = '';
+    
+    if (files.length > 0) {
+        preview.classList.remove('hidden');
+        
+        Array.from(files).forEach((file, index) => {
+            if (index < 5) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector('img').src = e.target.result;
+                    preview.appendChild(clone);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+function removeMediaAdmin(btn) {
+    btn.closest('div').remove();
+    const preview = document.getElementById('mediaPreviewAdmin');
+    if (preview.children.length === 0) {
+        preview.classList.add('hidden');
+    }
+}
+
+function confirmDeleteFeed(feedId) {
+    Swal.fire({
+        title: 'Delete Feed Post?',
+        text: 'This action cannot be undone. The post will be permanently deleted.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Delete Post',
+        cancelButtonText: 'Cancel',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit the hidden form
+            document.getElementById(`deleteForm-${feedId}`).submit();
+        }
+    });
+}
+
+// Show success alert when page loads if there's a success message
+document.addEventListener('DOMContentLoaded', function() {
+    const successMessage = document.querySelector('[role="alert"]');
+    if (successMessage && successMessage.textContent.includes('deleted')) {
+        const message = successMessage.textContent.trim();
+        setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: message,
+                confirmButtonColor: '#10b981',
+                confirmButtonText: 'OK'
+            });
+            // Optional: remove the old alert after showing SweetAlert
+            successMessage.remove();
+        }, 100);
+    }
+});
+</script>
 @endsection

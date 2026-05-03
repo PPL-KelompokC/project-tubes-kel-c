@@ -17,7 +17,7 @@
         ['label' => 'Challenges', 'path' => 'challenges', 'icon' => 'list-checks', 'group' => 'main'],
         ['label' => 'Carbon Tracker', 'path' => 'carbon', 'icon' => 'leaf', 'group' => 'main'],
         ['label' => 'Leaderboard', 'path' => 'leaderboard', 'icon' => 'trophy', 'group' => 'social'],
-        ['label' => 'Activity Feed', 'path' => '#', 'icon' => 'activity', 'group' => 'social'],
+        ['label' => 'Activity Feed', 'path' => 'feed', 'icon' => 'activity', 'group' => 'social'],
         ['label' => 'Community Map', 'path' => '#', 'icon' => 'map', 'group' => 'social'],
         ['label' => 'My Profile', 'path' => 'profile', 'icon' => 'star', 'group' => 'personal'],
         ['label' => 'Badges', 'path' => '#', 'icon' => 'shield-check', 'group' => 'personal'],

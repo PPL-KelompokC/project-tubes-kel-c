@@ -49,7 +49,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/feeds', [AdminFeed::class, 'index'])->name('feeds.index');
     Route::get('/feeds/{feed}', [AdminFeed::class, 'show'])->name('feeds.show');
     Route::post('/feeds/{feed}/hide', [AdminFeed::class, 'hide'])->name('feeds.hide');
-    Route::post('/feeds/{feed}/show', [AdminFeed::class, 'show_feed'])->name('feeds.show');
+    Route::post('/feeds/{feed}/unhide', [AdminFeed::class, 'show_feed'])->name('feeds.unhide');
     Route::delete('/feeds/{feed}', [AdminFeed::class, 'destroy'])->name('feeds.destroy');
     Route::get('/feeds/filter/by-status', [AdminFeed::class, 'filterByStatus'])->name('feeds.filter');
     Route::get('/feeds/search/query', [AdminFeed::class, 'search'])->name('feeds.search');
@@ -81,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Community Feed (verified submissions social wall)
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
+    Route::post('/feed', [FeedController::class, 'store'])->name('feed.store');
+    Route::post('/feed/{feed}/like', [FeedController::class, 'toggleLike'])->name('feed.like.toggle');
+    Route::post('/feed/{feed}/comments', [FeedController::class, 'storeComment'])->name('feed.comments.store');
 
     // Leaderboard (real data)
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
@@ -89,7 +92,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/carbon', fn() => view('carbon'))->name('carbon');
     Route::get('/map',    [EventController::class, 'index'])->name('map');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
-    Route::get('/profile', fn() => view('profile'))->name('profile');
+    // Profile & Avatar
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/avatar', [App\Http\Controllers\ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');
     Route::get('/rewards', fn() => view('rewards'))->name('rewards');

@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
+    public function feeds()
+    {
+        return $this->hasMany(Feed::class);
+    }
+
     // ── Streak Logic ───────────────────────────────────────────────
 
     /**
