@@ -43,7 +43,7 @@ class ArticleController extends Controller
             'thumbnail' => $thumbnailPath,
             'category' => $request->category,
             'is_published' => $request->has('is_published'),
-            'author_id' => Auth::id(),
+            'author_id' => Auth::id(), // ✅ Fix
         ]);
 
         return redirect()->route('admin.articles.index')
@@ -94,4 +94,3 @@ class ArticleController extends Controller
             ->with('success', 'Artikel berhasil dihapus!');
     }
 }
-

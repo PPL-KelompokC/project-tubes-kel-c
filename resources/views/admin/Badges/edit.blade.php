@@ -27,8 +27,11 @@
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Badge</label>
                 <input type="text" name="name"
-                    value="{{ $badge->name }}"
+                    value="{{ old('name', $badge->name) }}"
                     class="w-full border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 rounded-xl p-3">
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- GRID -->
@@ -38,8 +41,11 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Kategori</label>
                     <input type="text" name="category"
-                        value="{{ $badge->category }}"
+                        value="{{ old('category', $badge->category) }}"
                         class="w-full border border-slate-200 focus:border-emerald-500 rounded-xl p-3">
+                    @error('category')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- LEVEL -->
@@ -47,12 +53,10 @@
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Level</label>
                     <select name="level"
                         class="w-full border border-slate-200 focus:border-emerald-500 rounded-xl p-3">
-
                         <option {{ $badge->level == 'Common' ? 'selected' : '' }}>Common</option>
                         <option {{ $badge->level == 'Rare' ? 'selected' : '' }}>Rare</option>
                         <option {{ $badge->level == 'Epic' ? 'selected' : '' }}>Epic</option>
                         <option {{ $badge->level == 'Legendary' ? 'selected' : '' }}>Legendary</option>
-
                     </select>
                 </div>
 
@@ -62,14 +66,12 @@
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Deskripsi</label>
                 <textarea name="description" rows="3"
-                    class="w-full border border-slate-200 focus:border-emerald-500 rounded-xl p-3">{{ $badge->description }}</textarea>
+                    class="w-full border border-slate-200 focus:border-emerald-500 rounded-xl p-3">{{ old('description', $badge->description) }}</textarea>
             </div>
 
             <!-- ICON -->
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-2">Icon Badge</label>
-
-                <!-- ICON LAMA -->
                 @if($badge->icon)
                     <div class="mb-3 text-center">
                         <p class="text-xs text-slate-400 mb-1">Icon saat ini</p>
@@ -77,17 +79,16 @@
                              class="w-16 h-16 mx-auto rounded-full border shadow">
                     </div>
                 @endif
-
-                <!-- UPLOAD BARU -->
                 <div class="border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center hover:bg-emerald-50 transition cursor-pointer">
                     <input type="file" name="icon" class="hidden" onchange="previewImage(event)" id="upload">
-
                     <label for="upload" class="cursor-pointer text-sm text-slate-500">
                         📁 Klik untuk ganti icon
                     </label>
-
                     <img id="preview" class="mx-auto mt-3 w-16 h-16 hidden rounded-full border border-emerald-200 shadow"/>
                 </div>
+                @error('icon')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- STATUS -->
@@ -100,25 +101,19 @@
 
             <!-- BUTTON -->
             <div class="flex justify-between items-center pt-4">
-
                 <a href="{{ route('admin.badges.index') }}"
                    class="text-sm text-slate-500 hover:text-emerald-600 transition">
                     ← Kembali
                 </a>
-
                 <button class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-2.5 rounded-xl shadow-lg">
                     💾 Update Badge
                 </button>
-
             </div>
 
         </form>
-
     </div>
-
 </div>
 
-<!-- PREVIEW SCRIPT -->
 <script>
 function previewImage(event) {
     const reader = new FileReader();
@@ -130,5 +125,4 @@ function previewImage(event) {
     reader.readAsDataURL(event.target.files[0]);
 }
 </script>
-
 @endsection

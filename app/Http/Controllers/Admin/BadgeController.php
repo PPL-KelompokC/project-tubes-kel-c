@@ -25,6 +25,14 @@ class BadgeController extends Controller
     // SIMPAN DATA
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'level' => 'required|string',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
         $icon = null;
 
         if ($request->hasFile('icon')) {
@@ -54,9 +62,16 @@ class BadgeController extends Controller
     // UPDATE DATA
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'level' => 'required|string',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
         $badge = Badge::findOrFail($id);
 
-        // upload icon baru (kalau ada)
         if ($request->hasFile('icon')) {
             $icon = $request->file('icon')->store('badges', 'public');
             $badge->icon = $icon;
