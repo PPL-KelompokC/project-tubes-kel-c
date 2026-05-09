@@ -23,7 +23,7 @@
         ['label' => 'Badges', 'path' => '#', 'icon' => 'shield-check', 'group' => 'personal'],
         ['label' => 'My Stats', 'path' => '#', 'icon' => 'trending-up', 'group' => 'personal'],
         ['label' => 'Rewards', 'path' => '#', 'icon' => 'gift', 'group' => 'personal'],
-        ['label' => 'Learn', 'path' => '#', 'icon' => 'book-open', 'group' => 'learn'],
+        ['label' => 'Learn', 'path' => 'learn', 'icon' => 'book-open', 'group' => 'learn'],
         ['label' => 'Refer Friends', 'path' => '#', 'icon' => 'share-2', 'group' => 'learn'],
         ['label' => 'Notifications', 'path' => '#', 'icon' => 'bell', 'group' => 'system'],
     ];
