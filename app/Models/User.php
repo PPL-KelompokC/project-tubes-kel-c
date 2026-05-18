@@ -63,8 +63,6 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
-<<<<<<< Updated upstream
-=======
     public function feeds()
     {
         return $this->hasMany(Feed::class);
@@ -75,7 +73,6 @@ class User extends Authenticatable
         return $this->hasMany(RewardTransaction::class);
     }
 
->>>>>>> Stashed changes
     // ── Streak Logic ───────────────────────────────────────────────
 
     /**

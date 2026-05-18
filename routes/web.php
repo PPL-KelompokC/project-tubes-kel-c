@@ -99,18 +99,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', fn() => view('profile'))->name('profile');
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');
-<<<<<<< Updated upstream
-    Route::get('/rewards', fn() => view('rewards'))->name('rewards');
-    Route::get('/learn',  fn() => view('learn'))->name('learn');
-=======
 
     // Rewards (User Side)
     Route::get('/rewards', [App\Http\Controllers\RewardController::class, 'index'])->name('rewards');
     Route::post('/rewards/{reward}/redeem', [App\Http\Controllers\RewardController::class, 'redeem'])->name('rewards.redeem');
 
-    Route::get('/learn',  [LearnController::class, 'learn'])->name('learn');
-    Route::get('/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
->>>>>>> Stashed changes
+    Route::get('/learn',  [App\Http\Controllers\LearnController::class, 'learn'])->name('learn');
+    Route::get('/learn/{slug}', [App\Http\Controllers\LearnController::class, 'show'])->name('learn.show');
     Route::get('/referral', fn() => view('referral'))->name('referral');
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
 
