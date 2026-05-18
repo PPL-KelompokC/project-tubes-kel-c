@@ -20,6 +20,8 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticle;
 use App\Http\Controllers\Admin\ReferralController as AdminReferral;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmission;
 use App\Http\Controllers\Admin\FeedController as AdminFeed;
+use App\Http\Controllers\Admin\RewardController as AdminReward;
+use App\Http\Controllers\Admin\RewardTransactionController as AdminRewardTransaction;
 
 // ── Public / Guest Only ──────────────────────────────────────────
 Route::get('/', LandingController::class)->name('landing');
@@ -57,6 +59,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/submissions', [AdminSubmission::class, 'index'])->name('submissions.index');
     Route::post('/submissions/{submission}/approve', [AdminSubmission::class, 'approve'])->name('submissions.approve');
     Route::post('/submissions/{submission}/reject',  [AdminSubmission::class, 'reject'])->name('submissions.reject');
+
+    // Rewards Management
+    Route::patch('/rewards/{reward}/toggle-status', [AdminReward::class, 'toggleStatus'])->name('rewards.toggle-status');
+    Route::resource('rewards', AdminReward::class);
+    Route::get('/reward-transactions', [AdminRewardTransaction::class, 'index'])->name('rewards.transactions');
+    Route::patch('/reward-transactions/{transaction}/status', [AdminRewardTransaction::class, 'updateStatus'])->name('rewards.transactions.update-status');
 });
 
 // ── Authenticated User Routes ────────────────────────────────────
@@ -91,8 +99,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', fn() => view('profile'))->name('profile');
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');
+<<<<<<< Updated upstream
     Route::get('/rewards', fn() => view('rewards'))->name('rewards');
     Route::get('/learn',  fn() => view('learn'))->name('learn');
+=======
+
+    // Rewards (User Side)
+    Route::get('/rewards', [App\Http\Controllers\RewardController::class, 'index'])->name('rewards');
+    Route::post('/rewards/{reward}/redeem', [App\Http\Controllers\RewardController::class, 'redeem'])->name('rewards.redeem');
+
+    Route::get('/learn',  [LearnController::class, 'learn'])->name('learn');
+    Route::get('/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
+>>>>>>> Stashed changes
     Route::get('/referral', fn() => view('referral'))->name('referral');
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
 
