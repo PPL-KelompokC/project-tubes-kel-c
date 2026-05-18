@@ -29,6 +29,16 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
         ]);
 
+        // Add Nayla's account to ensure it's never lost during deployment seeds
+        $nayla = User::factory()->create([
+            'name' => 'Nayla Sena',
+            'email' => 'naylasena@gmail.com',
+            'password' => bcrypt('password'), // Or a default password you prefer
+            'role' => 'user',
+            'points' => 1200,
+            'streak' => 5,
+        ]);
+
         \App\Models\Event::create([
             'name' => 'SF Bay Cleanup',
             'type' => 'cleanup',
@@ -196,5 +206,8 @@ class DatabaseSeeder extends Seeder
             'status' => 'accepted',
             'user_id' => $user->id,
         ]);
+
+        // Seed Activity Feeds
+        $this->call(FeedSeeder::class);
     }
 }
