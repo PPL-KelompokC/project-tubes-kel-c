@@ -68,6 +68,11 @@ class User extends Authenticatable
         return $this->hasMany(Feed::class);
     }
 
+    public function rewardTransactions()
+    {
+        return $this->hasMany(RewardTransaction::class);
+    }
+
     // ── Streak Logic ───────────────────────────────────────────────
 
     /**
