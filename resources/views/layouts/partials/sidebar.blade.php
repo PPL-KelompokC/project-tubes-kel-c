@@ -21,7 +21,7 @@
         ['label' => 'Community Map', 'path' => '#', 'icon' => 'map', 'group' => 'social'],
         ['label' => 'My Profile', 'path' => 'profile', 'icon' => 'star', 'group' => 'personal'],
         ['label' => 'Badges', 'path' => '#', 'icon' => 'shield-check', 'group' => 'personal'],
-        ['label' => 'My Stats', 'path' => '#', 'icon' => 'trending-up', 'group' => 'personal'],
+        ['label' => 'My Stats', 'path' => 'stats', 'icon' => 'trending-up', 'group' => 'personal'],
         ['label' => 'Rewards', 'path' => '#', 'icon' => 'gift', 'group' => 'personal'],
         ['label' => 'Learn', 'path' => '#', 'icon' => 'book-open', 'group' => 'learn'],
         ['label' => 'Refer Friends', 'path' => '#', 'icon' => 'share-2', 'group' => 'learn'],
