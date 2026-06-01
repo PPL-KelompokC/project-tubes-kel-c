@@ -13,14 +13,57 @@ class FeedController extends Controller
      */
     public function index()
     {
+        $filter = request('filter', 'all');
+        
+        $query = Feed::with(['user', 'likes', 'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user']);
+            }])
+            ->active();  // Only show active feeds, not hidden
+
+        // Apply filter if not 'all'
+        if ($filter !== 'all') {
+            $query->where('feed_type', $filter);
+        }
+
+        $feeds = $query->latest()->paginate(15);
+
+        return view('feed', compact('feeds', 'filter'));
+    }
+
+    /**
+     * Search feeds by caption
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q', '');
+        
         $feeds = Feed::with(['user', 'likes', 'comments' => function($q) {
                 $q->whereNull('parent_id')->with(['user', 'replies.user']);
             }])
-            ->active()  // Only show active feeds, not hidden
+            ->active()
+            ->where('caption', 'like', '%' . $query . '%')
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->appends(['q' => $query]);
 
-        return view('feed', compact('feeds'));
+        return view('feed', compact('feeds', 'query'));
+    }
+
+    /**
+     * Show a single feed post
+     */
+    public function show(Feed $feed)
+    {
+        // Only show active feeds unless user is the owner or admin
+        if ($feed->status !== 'active' && $feed->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
+            abort(403, 'This post is not available.');
+        }
+
+        $feed->load(['user', 'likes', 'comments' => function($q) {
+            $q->whereNull('parent_id')->with(['user', 'replies.user']);
+        }]);
+
+        return view('feed.show', compact('feed'));
     }
 
     /**
@@ -39,6 +82,8 @@ class FeedController extends Controller
         // Handle media uploads
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
+                if (!$file) continue;
+                
                 $path = $file->store('feeds', 'public');
                 $mediaData[] = [
                     'url' => Storage::url($path),
@@ -133,5 +178,115 @@ class FeedController extends Controller
         }
         
         return 'file';
+    }
+
+    /**
+     * Show edit form for a feed post
+     */
+    public function edit(Feed $feed)
+    {
+        // Authorization: only the owner can edit
+        if ($feed->user_id !== auth()->id()) {
+            abort(403, 'You are not authorized to edit this post.');
+        }
+
+        return view('feed.edit', compact('feed'));
+    }
+
+    /**
+     * Update a feed post
+     */
+    public function update(Request $request, Feed $feed)
+    {
+        // Authorization: only the owner can update
+        if ($feed->user_id !== auth()->id()) {
+            abort(403, 'You are not authorized to update this post.');
+        }
+
+        $validated = $request->validate([
+            'caption' => 'required|string|min:1|max:5000',
+            'media' => 'nullable|array|max:5',
+            'media.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,mp4,mov|max:10240',
+        ]);
+
+        // Handle media uploads
+        $mediaData = $feed->media ?? [];
+
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                if (!$file) continue;
+                
+                $path = $file->store('feeds', 'public');
+                $mediaData[] = [
+                    'url' => Storage::url($path),
+                    'path' => $path,
+                    'type' => $this->getMimeType($file),
+                ];
+            }
+        }
+
+        // Update feed
+        $feed->update([
+            'caption' => $validated['caption'],
+            'media' => !empty($mediaData) ? $mediaData : null,
+        ]);
+
+        return redirect()->route('feed')
+            ->with('success', 'Your post has been updated! ✏️');
+    }
+
+    /**
+     * Delete a feed post
+     */
+    public function destroy(Feed $feed)
+    {
+        // Authorization: only the owner can delete
+        if ($feed->user_id !== auth()->id()) {
+            abort(403, 'You are not authorized to delete this post.');
+        }
+
+        // Delete media files
+        if ($feed->media && is_array($feed->media)) {
+            foreach ($feed->media as $media) {
+                $path = is_array($media) ? ($media['path'] ?? null) : null;
+                if ($path && Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+        }
+
+        $feed->delete();
+
+        return redirect()->route('feed')
+            ->with('success', 'Your post has been deleted! 🗑️');
+    }
+
+    /**
+     * Delete a comment from a feed post
+     */
+    public function destroyComment(Feed $feed, $commentId)
+    {
+        $comment = $feed->comments()->findOrFail($commentId);
+
+        // Authorization: only the comment owner can delete
+        if ($comment->user_id !== auth()->id()) {
+            abort(403, 'You are not authorized to delete this comment.');
+        }
+
+        // Delete comment image if exists
+        if ($comment->image && str_starts_with($comment->image, '/storage/')) {
+            $path = str_replace('/storage/', '', $comment->image);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        // Decrement feed comment count
+        $feed->decrement('comments_count');
+
+        // Delete comment
+        $comment->delete();
+
+        return back()->with('success', 'Comment deleted! 🗑️');
     }
 }

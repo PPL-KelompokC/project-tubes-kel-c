@@ -89,28 +89,48 @@
         </form>
     </div>
 
-    <!-- Category Tabs -->
-    <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 hide-scrollbar">
-        <a href="#" class="px-4 py-2 bg-white border border-green-200 rounded-full text-sm font-semibold text-green-700 whitespace-nowrap shadow-sm">
-            🌍 All
-        </a>
-        <a href="#" class="px-4 py-2 bg-white border border-gray-100 hover:border-gray-200 rounded-full text-sm font-medium text-gray-600 whitespace-nowrap shadow-sm transition-colors">
-            ✅ Challenges
-        </a>
-        <a href="#" class="px-4 py-2 bg-white border border-gray-100 hover:border-gray-200 rounded-full text-sm font-medium text-gray-600 whitespace-nowrap shadow-sm transition-colors">
-            🏅 Badges
-        </a>
-        <a href="#" class="px-4 py-2 bg-white border border-gray-100 hover:border-gray-200 rounded-full text-sm font-medium text-gray-600 whitespace-nowrap shadow-sm transition-colors">
-            🔥 Streaks
-        </a>
+    <!-- Search & Filter Section -->
+    <div class="space-y-3">
+        <!-- Search Box -->
+        <form action="{{ route('feed.search') }}" method="GET" class="relative">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ request('q', '') }}"
+                placeholder="Search postingan..." 
+                class="w-full bg-white border border-gray-200 rounded-full pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+            >
+            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Category Tabs -->
+        <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 hide-scrollbar">
+            <a href="{{ route('feed', ['filter' => 'all']) }}" class="px-4 py-2 bg-white border {{ request('filter', 'all') === 'all' ? 'border-green-200 text-green-700' : 'border-gray-100 text-gray-600 hover:border-gray-200' }} rounded-full text-sm font-semibold whitespace-nowrap shadow-sm transition-colors">
+                🌍 All
+            </a>
+            <a href="{{ route('feed', ['filter' => 'challenge']) }}" class="px-4 py-2 bg-white border {{ request('filter') === 'challenge' ? 'border-green-200 text-green-700' : 'border-gray-100 text-gray-600 hover:border-gray-200' }} rounded-full text-sm font-medium whitespace-nowrap shadow-sm transition-colors">
+                ✅ Challenges
+            </a>
+            <a href="{{ route('feed', ['filter' => 'badge']) }}" class="px-4 py-2 bg-white border {{ request('filter') === 'badge' ? 'border-green-200 text-green-700' : 'border-gray-100 text-gray-600 hover:border-gray-200' }} rounded-full text-sm font-medium whitespace-nowrap shadow-sm transition-colors">
+                🏅 Badges
+            </a>
+            <a href="{{ route('feed', ['filter' => 'streak']) }}" class="px-4 py-2 bg-white border {{ request('filter') === 'streak' ? 'border-green-200 text-green-700' : 'border-gray-100 text-gray-600 hover:border-gray-200' }} rounded-full text-sm font-medium whitespace-nowrap shadow-sm transition-colors">
+                🔥 Streaks
+            </a>
+        </div>
     </div>
 
     <!-- Feed Items -->
     @if($feeds->count() > 0)
         @foreach($feeds as $feed)
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <!-- Post Card with Link to Detail -->
+            <div onclick="window.location.href='{{ route('feed.show', $feed) }}'" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:border-gray-200 transition-all">
                 <!-- Header -->
-                <div class="flex items-center justify-between p-4 pb-3">
+                <div class="flex items-center justify-between p-4 pb-3" onclick="event.stopPropagation();">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         @if($feed->user->avatar)
                             <img src="{{ $feed->user->avatar }}" alt="{{ $feed->user->name }}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 flex-shrink-0" />
@@ -129,6 +149,29 @@
                             <p class="text-[10px] text-gray-400 mt-0.5">{{ $feed->created_at->diffForHumans() }}</p>
                         </div>
                     </div>
+
+                    <!-- Edit/Delete Actions (only for post owner) -->
+                    @if($feed->user_id === auth()->id())
+                        <div class="flex gap-2">
+                            <!-- Edit Button -->
+                            <a href="{{ route('feed.edit', $feed) }}" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit post">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+
+                            <!-- Delete Button with Modal Trigger -->
+                            <button 
+                                onclick="openDeleteModal('{{ $feed->id }}', '{{ addslashes($feed->user->name) }}')"
+                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete post"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Caption -->
@@ -196,7 +239,20 @@
                                         <div class="bg-white border border-gray-100 p-2.5 rounded-xl rounded-tl-none shadow-sm">
                                             <div class="flex items-center justify-between mb-1">
                                                 <span class="text-xs font-bold text-gray-900">{{ $comment->user->name }}</span>
-                                                <span class="text-[9px] text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[9px] text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                    @if($comment->user_id === auth()->id())
+                                                        <button 
+                                                            onclick="openDeleteCommentModal('{{ $feed->id }}', '{{ $comment->id }}')"
+                                                            class="p-0.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                            title="Delete comment"
+                                                        >
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
                                             @if($comment->content)
                                                 <p class="text-xs text-gray-700 break-words mb-1">{!! $comment->formatted_content !!}</p>
@@ -343,6 +399,185 @@ function removeMedia(btn) {
         preview.classList.add('hidden');
     }
 }
+
+// Delete Modal Functions
+let deleteModalData = { feedId: null, userName: '' };
+
+function openDeleteModal(feedId, userName) {
+    deleteModalData = { feedId, userName };
+    document.getElementById('deleteModal').classList.remove('hidden');
+    document.getElementById('deleteModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    document.getElementById('deleteModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    deleteModalData = { feedId: null, userName: '' };
+}
+
+function confirmDelete() {
+    if (deleteModalData.feedId) {
+        document.getElementById('deleteForm-' + deleteModalData.feedId).submit();
+    }
+}
+
+let deleteCommentModalData = { feedId: null, commentId: null };
+
+function openDeleteCommentModal(feedId, commentId) {
+    deleteCommentModalData = { feedId, commentId };
+    document.getElementById('deleteCommentModal').classList.remove('hidden');
+    document.getElementById('deleteCommentModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteCommentModal() {
+    document.getElementById('deleteCommentModal').classList.add('hidden');
+    document.getElementById('deleteCommentModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    deleteCommentModalData = { feedId: null, commentId: null };
+}
+
+function confirmDeleteComment() {
+    if (deleteCommentModalData.feedId && deleteCommentModalData.commentId) {
+        const form = document.getElementById('deleteCommentForm');
+        form.action = '/feed/' + deleteCommentModalData.feedId + '/comments/' + deleteCommentModalData.commentId;
+        form.submit();
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('deleteModal');
+    const commentModal = document.getElementById('deleteCommentModal');
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeDeleteModal();
+            }
+        });
+    }
+
+    if (commentModal) {
+        commentModal.addEventListener('click', function(e) {
+            if (e.target === commentModal) {
+                closeDeleteCommentModal();
+            }
+        });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+            closeDeleteCommentModal();
+        }
+    });
+});
 </script>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full animate-in fade-in zoom-in-95">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4 border-b border-red-200 rounded-t-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-2v-2m0-4v-2M6.228 6.228l1.414 1.414m9.9-1.414l1.414-1.414m0 9.9l1.414 1.414m-1.414 9.9l-1.414-1.414m9.9-1.414l1.414 1.414m-1.414 9.9l-1.414-1.414M6.228 17.772l1.414 1.414m9.9-1.414l1.414 1.414m-9.9-15.85a9 9 0 1018 0 9 9 0 00-18 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900">Delete Post?</h2>
+                    <p class="text-sm text-red-600 font-medium">This action cannot be undone</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="px-6 py-4">
+            <p class="text-gray-700 text-sm leading-relaxed mb-3">
+                Are you sure you want to delete this post? This will permanently remove the post and all associated media files.
+            </p>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2">
+                <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-xs text-red-700 font-medium">This includes all media and cannot be recovered.</p>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex gap-3">
+            <button 
+                onclick="closeDeleteModal()"
+                class="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmDelete()"
+                class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete Post
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Delete Forms (one for each feed) -->
+@foreach($feeds as $feed)
+    @if($feed->user_id === auth()->id())
+        <form id="deleteForm-{{ $feed->id }}" action="{{ route('feed.destroy', $feed) }}" method="POST" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+@endforeach
+
+<!-- Delete Comment Modal -->
+<div id="deleteCommentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full animate-in fade-in zoom-in-95">
+        <div class="bg-red-50 px-6 py-4 border-b border-red-200 rounded-t-2xl flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-2v-2m0-4v-2M6.228 6.228l1.414 1.414m9.9-1.414l1.414-1.414m0 9.9l1.414 1.414m-1.414 9.9l-1.414-1.414m9.9-1.414l1.414 1.414m-1.414 9.9l-1.414-1.414M6.228 17.772l1.414 1.414m9.9-1.414l1.414 1.414m-9.9-15.85a9 9 0 1018 0 9 9 0 00-18 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900">Delete Comment?</h2>
+        </div>
+        <div class="px-6 py-4">
+            <p class="text-gray-700 text-sm">Are you sure you want to delete this comment? This action cannot be undone.</p>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex gap-3">
+            <button 
+                onclick="closeDeleteCommentModal()"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmDeleteComment()"
+                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Delete Comment Form -->
+<form id="deleteCommentForm" action="" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
 
 @endsection
