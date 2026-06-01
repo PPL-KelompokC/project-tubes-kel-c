@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Event;
 use App\Http\Controllers\Controller;
+use App\Notifications\EventStatusChanged;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -29,6 +30,9 @@ class EventController extends Controller
         $event->update([
             'status' => $request->status,
         ]);
+
+        // Notify the event creator about status change
+        $event->user->notify(new EventStatusChanged($event));
 
         return redirect()->back()->with('success', 'Event status updated successfully.');
     }

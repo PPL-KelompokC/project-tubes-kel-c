@@ -25,7 +25,7 @@
         ['label' => 'Rewards', 'path' => 'rewards', 'icon' => 'gift', 'group' => 'personal'],
         ['label' => 'Learn', 'path' => 'learn', 'icon' => 'book-open', 'group' => 'learn'],
         ['label' => 'Refer Friends', 'path' => '#', 'icon' => 'share-2', 'group' => 'learn'],
-        ['label' => 'Notifications', 'path' => '#', 'icon' => 'bell', 'group' => 'system'],
+        ['label' => 'Notifications', 'path' => 'notifications', 'icon' => 'bell', 'group' => 'system'],
     ];
 
     // Admin panel link — only visible to admins
@@ -100,7 +100,8 @@
                             <!-- Simple SVG Icons based on Lucide names -->
                             @include('layouts.partials.icons.' . $item['icon'], ['class' => 'w-4.5 h-4.5 ' . ($isActive ? 'text-white' : '')])
                             @if($item['path'] === 'notifications' || $item['label'] === 'Notifications')
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif">3</span>
+                                @php $sidebarUnread = auth()->user() ? auth()->user()->unreadNotifications()->count() : 0; @endphp
+                                <span id="sidebar-notif-badge" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif {{ $sidebarUnread > 0 ? '' : 'hidden' }}">{{ $sidebarUnread }}</span>
                             @endif
                         </div>
                         <span class="text-sm font-medium {{ $isActive ? 'text-white' : '' }}">{{ $item['label'] }}</span>

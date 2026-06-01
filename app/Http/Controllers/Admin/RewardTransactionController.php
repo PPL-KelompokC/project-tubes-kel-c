@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\RewardTransaction;
 use App\Models\Reward;
+use App\Notifications\RedemptionCompleted;
+use App\Notifications\RedemptionRejected;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -59,6 +61,13 @@ class RewardTransactionController extends Controller
                 $user->increment('points', $transaction->points_used);
             }
         });
+
+        // Notify the user about their redemption status
+        if ($request->status === 'completed') {
+            $transaction->user->notify(new RedemptionCompleted($transaction));
+        } elseif ($request->status === 'rejected') {
+            $transaction->user->notify(new RedemptionRejected($transaction));
+        }
 
         return back()->with('success', 'Transaction status updated to ' . ucfirst($request->status));
     }

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Feed;
+use App\Notifications\CommentReplied;
+use App\Notifications\FeedCommented;
+use App\Notifications\FeedLiked;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -81,6 +85,11 @@ class FeedController extends Controller
         } else {
             $feed->likes()->create(['user_id' => auth()->id()]);
             $feed->increment('likes_count');
+
+            // Notify post owner (don't notify self)
+            if ($feed->user_id !== auth()->id()) {
+                $feed->user->notify(new FeedLiked($feed, auth()->user()));
+            }
         }
 
         return back();
@@ -115,6 +124,26 @@ class FeedController extends Controller
         ]);
 
         $feed->increment('comments_count');
+
+        $newComment = $feed->comments()->latest()->first();
+        $parentCommentOwnerId = null;
+
+        // If it's a reply, notify the parent comment author
+        if ($request->input('parent_id')) {
+            $parentComment = Comment::find($request->input('parent_id'));
+            if ($parentComment) {
+                $parentCommentOwnerId = $parentComment->user_id;
+                
+                if ($parentCommentOwnerId !== auth()->id()) {
+                    $parentComment->user->notify(new CommentReplied($newComment, auth()->user()));
+                }
+            }
+        }
+
+        // Notify post owner about the comment (don't notify self, and don't duplicate if they already got a reply notification)
+        if ($feed->user_id !== auth()->id() && $feed->user_id !== $parentCommentOwnerId) {
+            $feed->user->notify(new FeedCommented($feed, $newComment, auth()->user()));
+        }
 
         return back()->with('success', 'Comment posted!');
     }

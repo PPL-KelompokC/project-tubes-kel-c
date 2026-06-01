@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\SubmissionController as AdminSubmission;
 use App\Http\Controllers\Admin\FeedController as AdminFeed;
 use App\Http\Controllers\Admin\RewardController as AdminReward;
 use App\Http\Controllers\Admin\RewardTransactionController as AdminRewardTransaction;
+use App\Http\Controllers\NotificationController;
 
 // ── Public / Guest Only ──────────────────────────────────────────
 Route::get('/', LandingController::class)->name('landing');
@@ -114,7 +115,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/learn',  [App\Http\Controllers\LearnController::class, 'learn'])->name('learn');
     Route::get('/learn/{slug}', [App\Http\Controllers\LearnController::class, 'show'])->name('learn.show');
     Route::get('/referral', fn() => view('referral'))->name('referral');
-    Route::get('/notifications', fn() => view('notifications'))->name('notifications');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });

@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Challenge;
+use App\Models\User;
+use App\Notifications\NewChallengeAvailable;
+use Illuminate\Http\Request;
 
 class ChallengeController extends Controller
 {
@@ -33,6 +34,12 @@ class ChallengeController extends Controller
         ]);
 
         Challenge::create($validated);
+
+        // Notify all regular users about the new challenge
+        $challenge = Challenge::latest()->first();
+        User::where('role', 'user')->each(function ($user) use ($challenge) {
+            $user->notify(new NewChallengeAvailable($challenge));
+        });
 
         return redirect()->route('admin.challenges.index')->with('success', 'Challenge created successfully.');
     }
