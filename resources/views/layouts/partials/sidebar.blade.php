@@ -18,13 +18,13 @@
         ['label' => 'Carbon Tracker', 'path' => 'carbon', 'icon' => 'leaf', 'group' => 'main'],
         ['label' => 'Leaderboard', 'path' => 'leaderboard', 'icon' => 'trophy', 'group' => 'social'],
         ['label' => 'Activity Feed', 'path' => 'feed', 'icon' => 'activity', 'group' => 'social'],
-        ['label' => 'Community Map', 'path' => '#', 'icon' => 'map', 'group' => 'social'],
+        ['label' => 'Community Map', 'path' => 'map', 'icon' => 'map', 'group' => 'social'],
         ['label' => 'My Profile', 'path' => 'profile', 'icon' => 'star', 'group' => 'personal'],
-        ['label' => 'Badges', 'path' => '#', 'icon' => 'shield-check', 'group' => 'personal'],
-        ['label' => 'My Stats', 'path' => '#', 'icon' => 'trending-up', 'group' => 'personal'],
+        ['label' => 'Badges', 'path' => 'badges', 'icon' => 'shield-check', 'group' => 'personal'],
+        ['label' => 'My Stats', 'path' => 'stats', 'icon' => 'trending-up', 'group' => 'personal'],
         ['label' => 'Rewards', 'path' => 'rewards', 'icon' => 'gift', 'group' => 'personal'],
         ['label' => 'Learn', 'path' => 'learn', 'icon' => 'book-open', 'group' => 'learn'],
-        ['label' => 'Refer Friends', 'path' => '#', 'icon' => 'share-2', 'group' => 'learn'],
+        ['label' => 'Refer Friends', 'path' => 'referral', 'icon' => 'share-2', 'group' => 'learn'],
         ['label' => 'Notifications', 'path' => 'notifications', 'icon' => 'bell', 'group' => 'system'],
     ];
 

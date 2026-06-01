@@ -101,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/carbon', fn() => view('carbon'))->name('carbon');
     Route::get('/map',    [EventController::class, 'index'])->name('map');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::post('/events/{event}/join', [EventController::class, 'join'])->name('events.join');
     // Profile & Avatar
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
     Route::post('/profile/avatar', [App\Http\Controllers\ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
