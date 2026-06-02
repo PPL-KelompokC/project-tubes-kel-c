@@ -11,6 +11,7 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\LearnController;
+use App\Http\Controllers\StatsController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\ChallengeController as AdminChallenge;
 use App\Http\Controllers\Admin\BadgeController as AdminBadge;
@@ -120,6 +121,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
+    Route::get('/notifications', fn() => view('notifications'))->name('notifications');
+    Route::get('/stats',  [StatsController::class, 'index'])->name('stats');
 
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
