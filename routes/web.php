@@ -22,6 +22,9 @@ use App\Http\Controllers\Admin\ArticleController as AdminArticle;
 use App\Http\Controllers\Admin\ReferralController as AdminReferral;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmission;
 use App\Http\Controllers\Admin\FeedController as AdminFeed;
+use App\Http\Controllers\Admin\RewardController as AdminReward;
+use App\Http\Controllers\Admin\RewardTransactionController as AdminRewardTransaction;
+use App\Http\Controllers\NotificationController;
 
 // ── Public / Guest Only ──────────────────────────────────────────
 Route::get('/', LandingController::class)->name('landing');
@@ -50,7 +53,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/feeds', [AdminFeed::class, 'index'])->name('feeds.index');
     Route::get('/feeds/{feed}', [AdminFeed::class, 'show'])->name('feeds.show');
     Route::post('/feeds/{feed}/hide', [AdminFeed::class, 'hide'])->name('feeds.hide');
-    Route::post('/feeds/{feed}/show', [AdminFeed::class, 'show_feed'])->name('feeds.show');
+    Route::post('/feeds/{feed}/unhide', [AdminFeed::class, 'show_feed'])->name('feeds.unhide');
     Route::delete('/feeds/{feed}', [AdminFeed::class, 'destroy'])->name('feeds.destroy');
     Route::get('/feeds/filter/by-status', [AdminFeed::class, 'filterByStatus'])->name('feeds.filter');
     Route::get('/feeds/search/query', [AdminFeed::class, 'search'])->name('feeds.search');
@@ -59,6 +62,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/submissions', [AdminSubmission::class, 'index'])->name('submissions.index');
     Route::post('/submissions/{submission}/approve', [AdminSubmission::class, 'approve'])->name('submissions.approve');
     Route::post('/submissions/{submission}/reject',  [AdminSubmission::class, 'reject'])->name('submissions.reject');
+
+    // Rewards Management
+    Route::patch('/rewards/{reward}/toggle-status', [AdminReward::class, 'toggleStatus'])->name('rewards.toggle-status');
+    Route::resource('rewards', AdminReward::class);
+    Route::get('/reward-transactions', [AdminRewardTransaction::class, 'index'])->name('rewards.transactions');
+    Route::patch('/reward-transactions/{transaction}/status', [AdminRewardTransaction::class, 'updateStatus'])->name('rewards.transactions.update-status');
 });
 
 // ── Authenticated User Routes ────────────────────────────────────
@@ -82,6 +91,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Community Feed (verified submissions social wall)
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
+    Route::post('/feed', [FeedController::class, 'store'])->name('feed.store');
+    Route::post('/feed/{feed}/like', [FeedController::class, 'toggleLike'])->name('feed.like.toggle');
+    Route::post('/feed/{feed}/comments', [FeedController::class, 'storeComment'])->name('feed.comments.store');
 
     // Leaderboard (real data)
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
@@ -90,13 +102,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/carbon', fn() => view('carbon'))->name('carbon');
     Route::get('/map',    [EventController::class, 'index'])->name('map');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
-    Route::get('/profile', fn() => view('profile'))->name('profile');
+    Route::post('/events/{event}/join', [EventController::class, 'join'])->name('events.join');
+    // Profile & Avatar
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/avatar', [App\Http\Controllers\ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+
     Route::get('/badges', fn() => view('badges'))->name('badges');
     Route::get('/stats',  fn() => view('stats'))->name('stats');
-    Route::get('/rewards', fn() => view('rewards'))->name('rewards');
-    Route::get('/learn',  [LearnController::class, 'learn'])->name('learn');
-    Route::get('/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
+
+    // Rewards (User Side)
+    Route::get('/rewards', [App\Http\Controllers\RewardController::class, 'index'])->name('rewards');
+    Route::post('/rewards/{reward}/redeem', [App\Http\Controllers\RewardController::class, 'redeem'])->name('rewards.redeem');
+
+    Route::get('/learn',  [App\Http\Controllers\LearnController::class, 'learn'])->name('learn');
+    Route::get('/learn/{slug}', [App\Http\Controllers\LearnController::class, 'show'])->name('learn.show');
     Route::get('/referral', fn() => view('referral'))->name('referral');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
     Route::get('/notifications', fn() => view('notifications'))->name('notifications');
     Route::get('/stats',  [StatsController::class, 'index'])->name('stats');
 

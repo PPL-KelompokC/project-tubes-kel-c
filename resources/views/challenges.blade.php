@@ -111,12 +111,15 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @foreach($filteredChallenges as $i => $challenge)
             @php 
-                $isCompleted = $challenge['status'] === 'completed';
+                $status = $challenge['status'];
+                $isCompleted = $status === 'completed';
+                $isOnVerify = $status === 'on_verify';
+                $isRejected = $status === 'rejected';
                 $cat = collect($categories)->firstWhere('id', $challenge['category']) ?? [
                     'bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'border' => 'border-gray-100'
                 ];
             @endphp
-            <div class="group bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-bounce-in" style="animation-delay: {{ $i * 0.05 }}s">
+            <div class="group bg-white rounded-[32px] border {{ $isCompleted ? 'border-green-200' : ($isOnVerify ? 'border-yellow-200' : ($isRejected ? 'border-red-200' : 'border-gray-100')) }} shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-bounce-in" style="animation-delay: {{ $i * 0.05 }}s">
                 <!-- Card Image -->
                 <div class="relative h-56 overflow-hidden">
                     <img src="{{ $challenge['imageUrl'] }}" alt="{{ $challenge['title'] }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -138,7 +141,21 @@
                     @if($isCompleted)
                         <div class="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
                             <div class="bg-green-500 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg scale-110">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Done!
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Verified!
+                            </div>
+                        </div>
+                    @elseif($isOnVerify)
+                        <div class="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
+                            <div class="bg-yellow-500 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg scale-110">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                On Verify
+                            </div>
+                        </div>
+                    @elseif($isRejected)
+                        <div class="absolute inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
+                            <div class="bg-red-500 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg scale-110">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                Rejected
                             </div>
                         </div>
                     @endif
@@ -167,21 +184,41 @@
                         </div>
                     </div>
 
-                    <!-- Tip Box -->
-                    <div class="bg-amber-50/50 border border-amber-100/50 rounded-2xl p-3.5 flex items-start gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 flex-shrink-0 mt-0.5"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-                        <p class="text-[10px] text-amber-800 leading-relaxed font-semibold">{{ $challenge['impact'] }}</p>
-                    </div>
+                    @if($isRejected && !empty($challenge['submission']->rejection_reason))
+                        <div class="bg-red-50 border border-red-100 rounded-2xl p-3.5 flex flex-col gap-1">
+                            <div class="flex items-center gap-2 text-red-700 font-bold text-[10px]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                Rejected by Admin
+                            </div>
+                            <p class="text-[10px] text-red-600 leading-relaxed italic">"{{ $challenge['submission']->rejection_reason }}"</p>
+                        </div>
+                    @else
+                        <!-- Tip Box -->
+                        <div class="bg-amber-50/50 border border-amber-100/50 rounded-2xl p-3.5 flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 flex-shrink-0 mt-0.5"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                            <p class="text-[10px] text-amber-800 leading-relaxed font-semibold">{{ $challenge['impact'] }}</p>
+                        </div>
+                    @endif
 
                     <!-- Button -->
                     @if($isCompleted)
                         <div class="w-full bg-green-500 text-white font-bold py-4 rounded-2xl text-sm shadow-lg shadow-green-100 flex items-center justify-center gap-2 cursor-default">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            Done!
+                            Verified!
                         </div>
+                    @elseif($isOnVerify)
+                        <div class="w-full bg-yellow-500 text-white font-bold py-4 rounded-2xl text-sm shadow-lg shadow-yellow-100 flex items-center justify-center gap-2 cursor-default">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            Waiting Review
+                        </div>
+                    @elseif($isRejected)
+                        <a href="{{ route('challenges.submit', $challenge['id']) }}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-red-50 hover:shadow-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                            Retake Photo
+                        </a>
                     @else
                         <a href="{{ route('challenges.submit', $challenge['id']) }}" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-green-50 hover:shadow-green-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                             Mark Complete
                         </a>
                     @endif
@@ -212,7 +249,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('challenges') }}" method="GET" class="space-y-8">
+            <form action="{{ route('challenges') }}" method="GET" class="space-y-8" onsubmit="return validateFilterForm()">
                 <input type="hidden" name="search" value="{{ $search }}">
                 <input type="hidden" name="category" value="{{ $selectedCategory }}">
                 <input type="hidden" name="sort" value="{{ $currentSort }}">
@@ -235,20 +272,36 @@
                 <!-- Points Range -->
                 <div class="space-y-4">
                     <label class="text-sm font-bold text-gray-900">Points Range</label>
-                    <div class="flex gap-4 items-center">
-                        <input type="number" name="points_min" value="{{ $currentPointsMin }}" placeholder="Min" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
-                        <span class="text-gray-400">-</span>
-                        <input type="number" name="points_max" value="{{ $currentPointsMax }}" placeholder="Max" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-4 items-center">
+                            <input type="number" name="points_min" id="points_min" value="{{ old('points_min', $currentPointsMin) }}" placeholder="Min" class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('points_min') ? 'border-red-300 ring-1 ring-red-100' : 'border-gray-100' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <span class="text-gray-400">-</span>
+                            <input type="number" name="points_max" id="points_max" value="{{ old('points_max', $currentPointsMax) }}" placeholder="Max" class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('points_min') ? 'border-red-300 ring-1 ring-red-100' : 'border-gray-100' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                        </div>
+                        @error('points_min')
+                            <p class="text-[10px] font-semibold text-red-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
                 </div>
 
                 <!-- CO2 Range -->
                 <div class="space-y-4">
                     <label class="text-sm font-bold text-gray-900">CO₂ Saved (kg)</label>
-                    <div class="flex gap-4 items-center">
-                        <input type="number" name="co2_min" value="{{ $currentCo2Min }}" placeholder="Min" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
-                        <span class="text-gray-400">-</span>
-                        <input type="number" name="co2_max" value="{{ $currentCo2Max }}" placeholder="Max" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-4 items-center">
+                            <input type="number" name="co2_min" id="co2_min" value="{{ old('co2_min', $currentCo2Min) }}" placeholder="Min" class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('co2_min') ? 'border-red-300 ring-1 ring-red-100' : 'border-gray-100' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <span class="text-gray-400">-</span>
+                            <input type="number" name="co2_max" id="co2_max" value="{{ old('co2_max', $currentCo2Max) }}" placeholder="Max" class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('co2_min') ? 'border-red-300 ring-1 ring-red-100' : 'border-gray-100' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-100">
+                        </div>
+                        @error('co2_min')
+                            <p class="text-[10px] font-semibold text-red-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
                 </div>
 
@@ -288,6 +341,25 @@
         } else {
             document.body.style.overflow = 'auto';
         }
+    }
+
+    function validateFilterForm() {
+        const pointsMin = parseInt(document.getElementById('points_min').value);
+        const pointsMax = parseInt(document.getElementById('points_max').value);
+        const co2Min = parseInt(document.getElementById('co2_min').value);
+        const co2Max = parseInt(document.getElementById('co2_max').value);
+
+        if (!isNaN(pointsMin) && !isNaN(pointsMax) && pointsMin > pointsMax) {
+            alert('Error: Min points cannot be greater than max points.');
+            return false;
+        }
+
+        if (!isNaN(co2Min) && !isNaN(co2Max) && co2Min > co2Max) {
+            alert('Error: Min CO2 cannot be greater than max CO2.');
+            return false;
+        }
+
+        return true;
     }
 
     // Real-time search with debounce

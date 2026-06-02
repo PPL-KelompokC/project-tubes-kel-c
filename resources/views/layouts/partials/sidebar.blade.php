@@ -17,15 +17,15 @@
         ['label' => 'Challenges', 'path' => 'challenges', 'icon' => 'list-checks', 'group' => 'main'],
         ['label' => 'Carbon Tracker', 'path' => 'carbon', 'icon' => 'leaf', 'group' => 'main'],
         ['label' => 'Leaderboard', 'path' => 'leaderboard', 'icon' => 'trophy', 'group' => 'social'],
-        ['label' => 'Activity Feed', 'path' => '#', 'icon' => 'activity', 'group' => 'social'],
-        ['label' => 'Community Map', 'path' => '#', 'icon' => 'map', 'group' => 'social'],
+        ['label' => 'Activity Feed', 'path' => 'feed', 'icon' => 'activity', 'group' => 'social'],
+        ['label' => 'Community Map', 'path' => 'map', 'icon' => 'map', 'group' => 'social'],
         ['label' => 'My Profile', 'path' => 'profile', 'icon' => 'star', 'group' => 'personal'],
-        ['label' => 'Badges', 'path' => '#', 'icon' => 'shield-check', 'group' => 'personal'],
+        ['label' => 'Badges', 'path' => 'badges', 'icon' => 'shield-check', 'group' => 'personal'],
         ['label' => 'My Stats', 'path' => 'stats', 'icon' => 'trending-up', 'group' => 'personal'],
-        ['label' => 'Rewards', 'path' => '#', 'icon' => 'gift', 'group' => 'personal'],
-        ['label' => 'Learn', 'path' => '#', 'icon' => 'book-open', 'group' => 'learn'],
-        ['label' => 'Refer Friends', 'path' => '#', 'icon' => 'share-2', 'group' => 'learn'],
-        ['label' => 'Notifications', 'path' => '#', 'icon' => 'bell', 'group' => 'system'],
+        ['label' => 'Rewards', 'path' => 'rewards', 'icon' => 'gift', 'group' => 'personal'],
+        ['label' => 'Learn', 'path' => 'learn', 'icon' => 'book-open', 'group' => 'learn'],
+        ['label' => 'Refer Friends', 'path' => 'referral', 'icon' => 'share-2', 'group' => 'learn'],
+        ['label' => 'Notifications', 'path' => 'notifications', 'icon' => 'bell', 'group' => 'system'],
     ];
 
     // Admin panel link — only visible to admins
@@ -100,7 +100,8 @@
                             <!-- Simple SVG Icons based on Lucide names -->
                             @include('layouts.partials.icons.' . $item['icon'], ['class' => 'w-4.5 h-4.5 ' . ($isActive ? 'text-white' : '')])
                             @if($item['path'] === 'notifications' || $item['label'] === 'Notifications')
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif">3</span>
+                                @php $sidebarUnread = auth()->user() ? auth()->user()->unreadNotifications()->count() : 0; @endphp
+                                <span id="sidebar-notif-badge" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif {{ $sidebarUnread > 0 ? '' : 'hidden' }}">{{ $sidebarUnread }}</span>
                             @endif
                         </div>
                         <span class="text-sm font-medium {{ $isActive ? 'text-white' : '' }}">{{ $item['label'] }}</span>

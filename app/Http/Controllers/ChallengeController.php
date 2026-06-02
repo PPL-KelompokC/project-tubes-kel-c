@@ -35,6 +35,24 @@ class ChallengeController extends Controller
         }
 
         // Filter: Points Range
+        if ($request->filled('points_min') && $request->filled('points_max')) {
+            if ($request->points_min > $request->points_max) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['points_min' => 'Min points cannot be greater than max points.']);
+            }
+        }
+
+        // Filter: CO2 Range
+        if ($request->filled('co2_min') && $request->filled('co2_max')) {
+            if ($request->co2_min > $request->co2_max) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['co2_min' => 'Min CO2 cannot be greater than max CO2.']);
+            }
+        }
+
+        // Filter: Points Range Apply
         if ($request->filled('points_min')) {
             $query->where('points', '>=', $request->points_min);
         }
@@ -42,7 +60,7 @@ class ChallengeController extends Controller
             $query->where('points', '<=', $request->points_max);
         }
 
-        // Filter: CO2 Range
+        // Filter: CO2 Range Apply
         if ($request->filled('co2_min')) {
             $query->where('co2_saved', '>=', $request->co2_min);
         }
@@ -55,13 +73,13 @@ class ChallengeController extends Controller
             if ($request->status === 'completed') {
                 $query->whereHas('submissions', function($q) use ($user) {
                     $q->where('user_id', $user->id)
-                      ->whereIn('status', ['verified', 'pending_admin'])
+                      ->where('status', 'verified')
                       ->whereDate('created_at', today());
                 });
             } elseif ($request->status === 'uncompleted') {
                 $query->whereDoesntHave('submissions', function($q) use ($user) {
                     $q->where('user_id', $user->id)
-                      ->whereIn('status', ['verified', 'pending_admin'])
+                      ->where('status', 'verified')
                       ->whereDate('created_at', today());
                 });
             }
@@ -96,12 +114,20 @@ class ChallengeController extends Controller
             // Check submission status for current user (Treat all as daily)
             $sub = ChallengeSubmission::where('user_id', $user->id)
                 ->where('challenge_id', $c->id)
-                ->whereIn('status', ['verified', 'pending_admin'])
                 ->whereDate('created_at', today())
                 ->latest()
                 ->first();
 
-            $status = $sub ? 'completed' : 'pending';
+            $status = 'pending';
+            if ($sub) {
+                if ($sub->status === 'verified') {
+                    $status = 'completed';
+                } elseif ($sub->status === 'pending_admin') {
+                    $status = 'on_verify';
+                } elseif ($sub->status === 'rejected') {
+                    $status = 'rejected';
+                }
+            }
 
             return [
                 'id' => $c->id,
@@ -112,6 +138,7 @@ class ChallengeController extends Controller
                 'points' => $c->points,
                 'co2Saved' => $c->co2_saved,
                 'status' => $status,
+                'submission' => $sub,
                 'imageUrl' => $c->image_url,
                 'participants' => $c->submissions()->distinct('user_id')->count(),
                 'impact' => $c->impact ?? 'Reduced carbon footprint'

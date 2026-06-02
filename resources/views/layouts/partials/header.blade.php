@@ -30,7 +30,7 @@
 
     $currentRoute = Route::currentRouteName() ?? 'dashboard';
     $page = $pageTitles[$currentRoute] ?? ['title' => 'TerraVerde', 'subtitle' => ''];
-    $unread = 3;
+    $unread = $user ? $user->unreadNotifications()->count() : 0;
 @endphp
 
 <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 px-4 lg:px-6 h-16 flex items-center gap-4">
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Right actions -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-shrink-0">
         @auth
             <!-- Streak pill -->
             <div class="hidden sm:flex items-center gap-1.5 bg-orange-50 border border-orange-100 rounded-full px-3 py-1.5">
@@ -81,8 +81,12 @@
                 <a href="{{ route('notifications') }}" class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-xl transition-colors block">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     @if($unread > 0)
-                        <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-notif">
+                        <span id="header-notif-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-notif">
                             {{ $unread }}
+                        </span>
+                    @else
+                        <span id="header-notif-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-notif hidden">
+                            0
                         </span>
                     @endif
                 </a>

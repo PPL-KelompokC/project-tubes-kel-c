@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'EcoChallenge - SDG 13 Climate Action')</title>
     
     <!-- Fonts -->
@@ -12,6 +13,11 @@
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js & SweetAlert2 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -72,6 +78,22 @@
 
     <!-- Confetti Canvas -->
     <canvas id="confetti-canvas"></canvas>
+
+    <!-- Pusher & Echo (for Reverb) -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+    <script>
+        window.Pusher = Pusher;
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ env('REVERB_APP_KEY') }}',
+            wsHost: '{{ env('REVERB_HOST', 'localhost') }}',
+            wsPort: {{ env('REVERB_PORT', 8080) }},
+            wssPort: {{ env('REVERB_PORT', 8080) }},
+            forceTLS: (window.location.protocol === 'https:'),
+            enabledTransports: ['ws', 'wss'],
+        });
+    </script>
 
     @stack('scripts')
 </body>
