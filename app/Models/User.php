@@ -26,6 +26,8 @@ class User extends Authenticatable
         'last_active_date',
         'carbon_saved',
         'challenges_completed',
+        'referral_code',
+        'referred_by',
     ];
 
     protected $hidden = [
@@ -44,6 +46,16 @@ class User extends Authenticatable
 
     // ── Relationships ──────────────────────────────────────────────
 
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
     public function challenges()
     {
         return $this->belongsToMany(Challenge::class, 'user_challenges')
@@ -61,6 +73,16 @@ class User extends Authenticatable
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    public function feeds()
+    {
+        return $this->hasMany(Feed::class);
+    }
+
+    public function rewardTransactions()
+    {
+        return $this->hasMany(RewardTransaction::class);
     }
 
     // ── Streak Logic ───────────────────────────────────────────────

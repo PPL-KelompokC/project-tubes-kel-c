@@ -19,6 +19,7 @@
         <div class="bg-white py-10 px-8 shadow-2xl shadow-gray-200/50 sm:rounded-[32px] border border-gray-100 animate-bounce-in">
             <form class="space-y-6" action="{{ route('register') }}" method="POST">
                 @csrf
+                <input type="hidden" name="ref" value="{{ request()->query('ref') }}">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="name" class="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">Full Name</label>
