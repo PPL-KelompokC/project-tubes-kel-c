@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\StreakMilestone;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -75,6 +76,14 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
+<<<<<<< HEAD
+=======
+    public function joinedEvents()
+    {
+        return $this->belongsToMany(Event::class, 'event_user');
+    }
+
+>>>>>>> b7f29169b8d5ed13033c75472146d88a00b480d3
     public function feeds()
     {
         return $this->hasMany(Feed::class);
@@ -140,5 +149,11 @@ class User extends Authenticatable
 
         $this->last_active_date = $today;
         $this->save();
+
+        // Check for streak milestones
+        $milestones = [7, 14, 30, 50, 100];
+        if (in_array($this->attributes['streak'], $milestones)) {
+            $this->notify(new StreakMilestone($this->attributes['streak']));
+        }
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ChallengeSubmission;
 use App\Models\User;
+use App\Notifications\SubmissionApproved;
+use App\Notifications\SubmissionRejected;
 use Illuminate\Http\Request;
 
 class SubmissionController extends Controller
@@ -47,6 +49,8 @@ class SubmissionController extends Controller
         $submitter->increment('challenges_completed');
         $submitter->updateStreak();
 
+        $submitter->notify(new SubmissionApproved($submission));
+
         return back()->with('success', "Submission approved! {$points} points awarded to {$submitter->name}.");
     }
 
@@ -63,6 +67,8 @@ class SubmissionController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $request->input('reason'),
         ]);
+
+        $submission->user->notify(new SubmissionRejected($submission));
 
         return back()->with('success', 'Submission rejected.');
     }
