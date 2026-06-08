@@ -111,7 +111,7 @@
 
         <!-- Comment Form -->
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <form action="{{ route('feed.comments.store', $feed->id) }}" method="POST" enctype="multipart/form-data" class="flex gap-3">
+            <form action="{{ route('feed.comments.store', $feed->id) }}" method="POST" class="flex gap-3">
                 @csrf
                 @if(auth()->user()->avatar)
                     <img src="{{ auth()->user()->avatar }}" alt="Your Avatar" class="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 flex-shrink-0" />
@@ -126,12 +126,8 @@
                             type="text" 
                             name="content" 
                             placeholder="Write a comment..." 
-                            class="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-full pl-4 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+                            class="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
                         >
-                        <label class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-green-600 cursor-pointer rounded-full hover:bg-gray-100 transition-colors" title="Attach an image">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                            <input type="file" name="image" accept="image/*" class="hidden" onchange="this.parentElement.style.color = '#16a34a'; this.parentElement.title = 'Image selected: ' + this.files[0].name;">
-                        </label>
                     </div>
                     @error('content') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -180,6 +176,28 @@
                         </div>
                     </div>
 
+                    <!-- Reply Button & Form -->
+                    <div class="flex gap-4 mt-1 px-1 ml-14 mb-2">
+                        <button onclick="document.getElementById('reply-form-{{ $comment->id }}').classList.toggle('hidden')" class="text-[10px] font-semibold text-gray-500 hover:text-gray-700">Reply</button>
+                    </div>
+
+                    <form id="reply-form-{{ $comment->id }}" action="{{ route('feed.comments.store', $feed->id) }}" method="POST" class="hidden flex gap-2 mt-2 ml-14 mb-4">
+                        @csrf
+                        <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                id="reply-input-{{ $comment->id }}"
+                                name="content" 
+                                placeholder="Reply to {{ $comment->user->name }}..." 
+                                class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
+                            >
+                        </div>
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white p-1.5 rounded-lg flex-shrink-0 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </form>
+
                     <!-- Replies -->
                     @if($comment->replies && $comment->replies->count() > 0)
                         <div class="ml-12 space-y-3">
@@ -216,6 +234,10 @@
                                         @if($reply->image)
                                             <img src="{{ $reply->image }}" class="rounded max-h-32 object-cover border border-gray-100 cursor-pointer hover:opacity-90 transition-opacity" alt="Reply Image" onclick="openImageModal('{{ $reply->image }}')">
                                         @endif
+                                        <!-- Reply to Reply Button -->
+                                        <div class="flex justify-end mt-1 px-1">
+                                            <button type="button" onclick="showReplyForm('{{ $comment->id }}', '{{ str_replace(' ', '', $reply->user->name) }}')" class="text-[9px] font-semibold text-gray-500 hover:text-gray-700">Reply</button>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
@@ -326,6 +348,16 @@
 </form>
 
 <script>
+    function showReplyForm(commentId, userName) {
+        const form = document.getElementById('reply-form-' + commentId);
+        const input = document.getElementById('reply-input-' + commentId);
+        if (form && input) {
+            form.classList.remove('hidden');
+            input.value = '@' + userName + ' ';
+            input.focus();
+        }
+    }
+
     let deletePostData = { feedId: null };
     let deleteCommentData = { feedId: null, commentId: null };
 

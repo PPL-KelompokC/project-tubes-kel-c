@@ -51,6 +51,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/feeds/{feed}/hide', [AdminFeed::class, 'hide'])->name('feeds.hide');
     Route::post('/feeds/{feed}/unhide', [AdminFeed::class, 'show_feed'])->name('feeds.unhide');
     Route::delete('/feeds/{feed}', [AdminFeed::class, 'destroy'])->name('feeds.destroy');
+    Route::post('/feeds/{feed}/comments', [AdminFeed::class, 'storeComment'])->name('feeds.comments.store');
+    Route::delete('/feeds/{feed}/comments/{comment}', [AdminFeed::class, 'destroyComment'])->name('feeds.comments.destroy');
     Route::get('/feeds/filter/by-status', [AdminFeed::class, 'filterByStatus'])->name('feeds.filter');
     Route::get('/feeds/search/query', [AdminFeed::class, 'search'])->name('feeds.search');
 

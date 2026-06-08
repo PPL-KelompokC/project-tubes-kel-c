@@ -268,20 +268,17 @@
                                         </div>
 
                                         <!-- Hidden Reply Form -->
-                                        <form id="reply-form-{{ $comment->id }}" action="{{ route('feed.comments.store', $feed->id) }}" method="POST" enctype="multipart/form-data" class="hidden flex gap-2 mt-2">
+                                        <form id="reply-form-{{ $comment->id }}" action="{{ route('feed.comments.store', $feed->id) }}" method="POST" class="hidden flex gap-2 mt-2">
                                             @csrf
                                             <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                                             <div class="flex-1 relative">
                                                 <input 
                                                     type="text" 
+                                                    id="reply-input-{{ $comment->id }}"
                                                     name="content" 
                                                     placeholder="Reply to {{ $comment->user->name }}..." 
-                                                    class="w-full text-xs bg-white border border-gray-200 rounded-full pl-3 pr-10 py-1.5 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
+                                                    class="w-full text-xs bg-white border border-gray-200 rounded-full px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
                                                 >
-                                                <label class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-green-600 cursor-pointer rounded-full" title="Attach an image">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                                                    <input type="file" name="image" accept="image/*" class="hidden" onchange="this.parentElement.style.color = '#16a34a';">
-                                                </label>
                                             </div>
                                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-1.5 rounded-full flex-shrink-0 transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -311,6 +308,10 @@
                                                             @if($reply->image)
                                                                 <img src="{{ $reply->image }}" class="rounded-lg max-h-24 object-cover border border-gray-100" alt="Reply Image">
                                                             @endif
+                                                            <!-- Reply to Reply Button -->
+                                                            <div class="flex justify-end mt-1 px-1">
+                                                                <button type="button" onclick="showReplyForm('{{ $comment->id }}', '{{ str_replace(' ', '', $reply->user->name) }}')" class="text-[9px] font-semibold text-gray-500 hover:text-gray-700">Reply</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -323,20 +324,15 @@
                     @endif
 
                     <!-- Comment Form -->
-                    <form action="{{ route('feed.comments.store', $feed->id) }}" method="POST" enctype="multipart/form-data" class="flex gap-2 mt-2 pt-2 border-t border-gray-200">
+                    <form action="{{ route('feed.comments.store', $feed->id) }}" method="POST" class="flex gap-2 mt-2 pt-2 border-t border-gray-200">
                         @csrf
                         <div class="flex-1 relative">
                             <input 
                                 type="text" 
                                 name="content" 
                                 placeholder="Write a comment..." 
-                                class="w-full text-xs bg-white border border-gray-200 rounded-full pl-3 pr-10 py-2 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
+                                class="w-full text-xs bg-white border border-gray-200 rounded-full px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-400"
                             >
-                            <!-- Image Upload Button for Comment -->
-                            <label class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-green-600 cursor-pointer rounded-full hover:bg-gray-100 transition-colors" title="Attach an image">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                                <input type="file" name="image" accept="image/*" class="hidden" onchange="this.parentElement.style.color = '#16a34a'; this.parentElement.title = 'Image selected: ' + this.files[0].name;">
-                            </label>
                         </div>
                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full flex-shrink-0 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -344,7 +340,6 @@
                     </form>
                     
                     @error('content') <p class="text-[10px] text-red-500 mt-1 pl-2">{{ $message }}</p> @enderror
-                    @error('image') <p class="text-[10px] text-red-500 mt-1 pl-2">{{ $message }}</p> @enderror
                 </div>
             </div>
         @endforeach
@@ -366,6 +361,16 @@
 </div>
 
 <script>
+function showReplyForm(commentId, userName) {
+    const form = document.getElementById('reply-form-' + commentId);
+    const input = document.getElementById('reply-input-' + commentId);
+    if (form && input) {
+        form.classList.remove('hidden');
+        input.value = '@' + userName + ' ';
+        input.focus();
+    }
+}
+
 // Handle media selection with preview
 function handleMediaSelect(input) {
     const files = input.files;
