@@ -247,18 +247,7 @@
         });
     }
 
-    // ── Real-time notifications via Echo (Reverb WebSocket) ──────────
-    if (typeof Echo !== 'undefined') {
-        const userId = {{ auth()->id() }};
-        Echo.private(`App.Models.User.${userId}`)
-            .notification((notification) => {
-                console.log('🔔 New notification:', notification);
-
-                // Refresh the page to show the new notification
-                // (For a more sophisticated UX, inject the notification HTML dynamically)
-                window.location.reload();
-            });
-    }
+    // ── Global Real-time notifications handled in app.blade.php ──────────
 
     // ── Polling fallback (every 30 seconds) ──────────────────────────
     // This ensures notifications update even without WebSocket
@@ -270,10 +259,11 @@
         .then(res => res.json())
         .then(data => {
             if (data.count !== lastUnreadCount) {
+                const oldCount = lastUnreadCount;
                 lastUnreadCount = data.count;
 
                 // If count increased, a new notification arrived
-                if (data.count > lastUnreadCount) {
+                if (data.count > oldCount) {
                     window.location.reload();
                 }
 

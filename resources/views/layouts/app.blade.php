@@ -93,6 +93,50 @@
             forceTLS: (window.location.protocol === 'https:'),
             enabledTransports: ['ws', 'wss'],
         });
+
+        @auth
+            if (typeof Echo !== 'undefined') {
+                const userId = {{ auth()->id() }};
+                Echo.private(`App.Models.User.${userId}`)
+                    .notification((notification) => {
+                        console.log('🔔 New global notification:', notification);
+                        
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                        });
+                        
+                        Toast.fire({
+                            icon: 'info',
+                            title: notification.title || 'New Notification',
+                            text: notification.message || ''
+                        });
+
+                        fetch('/notifications/unread-count', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                            }
+                        }).then(res => res.json()).then(data => {
+                            const count = data.count || 0;
+                            ['header-notif-badge', 'sidebar-notif-badge', 'unread-tab-badge'].forEach(id => {
+                                const badge = document.getElementById(id);
+                                if (badge) {
+                                    badge.textContent = count;
+                                    badge.classList.toggle('hidden', count === 0);
+                                }
+                            });
+                            
+                            if (window.location.pathname.includes('/notifications')) {
+                                window.location.reload();
+                            }
+                        }).catch(err => console.error(err));
+                    });
+            }
+        @endauth
     </script>
 
     @stack('scripts')
