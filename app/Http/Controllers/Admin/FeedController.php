@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Feed;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FeedController extends Controller
 {
@@ -137,5 +138,67 @@ class FeedController extends Controller
             ->get();
 
         return view('admin.feeds.index', compact('feeds', 'stats', 'query', 'members'));
+    }
+
+    /**
+     * Store a new comment for a feed post (Admin can comment on user posts)
+     */
+    public function storeComment(Request $request, Feed $feed)
+    {
+        $request->validate([
+            'content' => 'required_without:image|nullable|string|max:1000',
+            'image' => 'required_without:content|nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'parent_id' => 'nullable|exists:comments,id',
+        ], [
+            'content.required_without' => 'Please provide either text or an image for your comment.',
+            'image.required_without' => 'Please provide either text or an image for your comment.',
+        ]);
+
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('comments', 'public');
+            $imagePath = Storage::url($path);
+        }
+
+        $feed->comments()->create([
+            'user_id' => auth()->id(),
+            'parent_id' => $request->input('parent_id'),
+            'content' => $request->input('content'),
+            'image' => $imagePath,
+        ]);
+
+        $feed->increment('comments_count');
+
+        return back()->with('success', 'Comment posted! 💬');
+    }
+
+    /**
+     * Delete a comment from a feed post (Admin can only delete their own comments)
+     */
+    public function destroyComment(Feed $feed, $commentId)
+    {
+        $comment = $feed->comments()->findOrFail($commentId);
+
+        // Authorization: only the comment owner can delete
+        if ($comment->user_id !== auth()->id()) {
+            abort(403, 'You are not authorized to delete this comment.');
+        }
+
+        // Delete comment image if exists
+        if ($comment->image && str_starts_with($comment->image, '/storage/')) {
+            $path = str_replace('/storage/', '', $comment->image);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        // Decrement feed comment count
+        $feed->decrement('comments_count');
+
+        // Delete comment
+        $comment->delete();
+
+        return back()->with('success', 'Comment deleted! 🗑️');
     }
 }

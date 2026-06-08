@@ -202,13 +202,21 @@
 
     <!-- Recent activity -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <h3 class="text-sm font-bold text-gray-900 mb-4">My Recent Posts</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-gray-900">My Recent Posts</h3>
+            <a href="{{ route('feed') }}" class="text-xs font-semibold text-green-600 hover:text-green-700 flex items-center gap-1">
+                View All
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
         <div class="space-y-3">
             @forelse($myPosts as $post)
-                <div class="flex gap-3">
+                <div class="flex gap-3 group">
                     <img src="{{ $currentUser['avatar'] }}" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                    <div class="flex-1 bg-gray-50 rounded-xl p-3">
-                        <p class="text-xs text-gray-700">{{ $post->caption }}</p>
+                    <div class="flex-1 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 cursor-pointer transition-colors" onclick="window.location.href='{{ route('feed.show', $post) }}'">
+                        <p class="text-xs text-gray-700">{{ Str::limit($post->caption, 100) }}</p>
                         
                         @if($post->media && count($post->media) > 0)
                             <div class="mt-2 grid grid-cols-2 gap-1">
@@ -240,6 +248,20 @@
                             <span>{{ $post->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
+
+                    <!-- Edit/Delete Actions -->
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
+                        <a href="{{ route('feed.edit', $post) }}" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </a>
+                        <button onclick="openDeletePostModal('{{ $post->id }}')" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             @empty
                 <div class="text-center py-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
@@ -249,4 +271,72 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Post Modal -->
+<div id="deletePostModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full">
+        <div class="bg-red-50 px-6 py-4 border-b border-red-200 rounded-t-2xl flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-2v-2m0-4v-2M6.228 6.228l1.414 1.414m9.9-1.414l1.414-1.414m0 9.9l1.414 1.414m-1.414 9.9l-1.414-1.414m9.9-1.414l1.414 1.414m-1.414 9.9l-1.414-1.414M6.228 17.772l1.414 1.414m9.9-1.414l1.414 1.414m-9.9-15.85a9 9 0 1018 0 9 9 0 00-18 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900">Delete Post?</h2>
+        </div>
+        <div class="px-6 py-4">
+            <p class="text-gray-700 text-sm">Are you sure you want to delete this post? This action cannot be undone.</p>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex gap-3">
+            <button 
+                onclick="closeDeletePostModal()"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmDeletePost()"
+                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+            >
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deletePostData = { postId: null };
+
+    function openDeletePostModal(postId) {
+        deletePostData.postId = postId;
+        document.getElementById('deletePostModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeletePostModal() {
+        document.getElementById('deletePostModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        deletePostData.postId = null;
+    }
+
+    function confirmDeletePost() {
+        if (deletePostData.postId) {
+            window.location.href = '/feed/' + deletePostData.postId + '?_method=DELETE&_token={{ csrf_token() }}';
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/feed/' + deletePostData.postId;
+            form.innerHTML = '@csrf @method("DELETE")';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    document.getElementById('deletePostModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeDeletePostModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDeletePostModal();
+    });
+</script>
+
 @endsection

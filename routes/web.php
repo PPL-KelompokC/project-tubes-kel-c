@@ -55,6 +55,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/feeds/{feed}/hide', [AdminFeed::class, 'hide'])->name('feeds.hide');
     Route::post('/feeds/{feed}/unhide', [AdminFeed::class, 'show_feed'])->name('feeds.unhide');
     Route::delete('/feeds/{feed}', [AdminFeed::class, 'destroy'])->name('feeds.destroy');
+    Route::post('/feeds/{feed}/comments', [AdminFeed::class, 'storeComment'])->name('feeds.comments.store');
+    Route::delete('/feeds/{feed}/comments/{comment}', [AdminFeed::class, 'destroyComment'])->name('feeds.comments.destroy');
     Route::get('/feeds/filter/by-status', [AdminFeed::class, 'filterByStatus'])->name('feeds.filter');
     Route::get('/feeds/search/query', [AdminFeed::class, 'search'])->name('feeds.search');
 
@@ -91,9 +93,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Community Feed (verified submissions social wall)
     Route::get('/feed', [FeedController::class, 'index'])->name('feed');
+    Route::get('/feed/search', [FeedController::class, 'search'])->name('feed.search');
+    Route::get('/feed/{feed}', [FeedController::class, 'show'])->name('feed.show');
     Route::post('/feed', [FeedController::class, 'store'])->name('feed.store');
+    Route::get('/feed/{feed}/edit', [FeedController::class, 'edit'])->name('feed.edit');
+    Route::patch('/feed/{feed}', [FeedController::class, 'update'])->name('feed.update');
+    Route::delete('/feed/{feed}', [FeedController::class, 'destroy'])->name('feed.destroy');
     Route::post('/feed/{feed}/like', [FeedController::class, 'toggleLike'])->name('feed.like.toggle');
     Route::post('/feed/{feed}/comments', [FeedController::class, 'storeComment'])->name('feed.comments.store');
+    Route::delete('/feed/{feed}/comments/{comment}', [FeedController::class, 'destroyComment'])->name('feed.comments.destroy');
 
     // Leaderboard (real data)
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');

@@ -63,10 +63,6 @@
                     />
                 </form>
             </div>
-            <button class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 shadow-sm flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
-                Sort
-            </button>
         </div>
 
         <!-- Filter Tabs & New Post Button -->
@@ -75,10 +71,6 @@
                 <a href="{{ route('admin.feeds.index') }}" class="flex items-center gap-2 pb-2 border-b-2 {{ !isset($status) || $status === 'all' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700' }} font-bold text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     All Post <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded-md">{{ $stats['total'] }}</span>
-                </a>
-                <a href="#" class="flex items-center gap-2 pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-bold text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Media <span class="bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-md">0</span>
                 </a>
             </div>
             
@@ -279,11 +271,14 @@
                     <!-- Footer / Engagement -->
                     <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
                         <div class="flex items-center gap-6">
-                            <button class="flex items-center gap-2 hover:text-rose-500 transition-colors">
-                                <svg class="w-5 h-5 {{ $feed->likes_count > 0 ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                <span class="font-medium {{ $feed->likes_count > 0 ? 'text-rose-500' : '' }}">{{ $feed->likes_count ?: '' }}</span>
-                            </button>
-                            <button class="flex items-center gap-2 hover:text-emerald-500 transition-colors">
+                            <form action="{{ route('feed.like.toggle', $feed->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="flex items-center gap-2 hover:text-rose-500 transition-colors {{ $feed->likes->contains('user_id', auth()->id()) ? 'text-rose-500 font-semibold' : '' }}">
+                                    <svg class="w-5 h-5 {{ $feed->likes->contains('user_id', auth()->id()) ? 'text-rose-500 fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                    <span class="font-medium {{ $feed->likes->contains('user_id', auth()->id()) ? 'text-rose-500' : '' }}">{{ $feed->likes_count ?: '' }}</span>
+                                </button>
+                            </form>
+                            <button onclick="document.getElementById('comments-{{ $feed->id }}').classList.toggle('hidden')" class="flex items-center gap-2 hover:text-emerald-500 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                 <span class="font-medium">{{ $feed->comments_count ?: '' }}</span>
                             </button>
@@ -292,6 +287,156 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                             Share
                         </button>
+                    </div>
+
+                    <!-- Comments Section (Hidden by default) -->
+                    <div id="comments-{{ $feed->id }}" class="hidden bg-slate-50 border-t border-slate-100 px-5 py-4 rounded-b-3xl">
+                        <!-- Existing Comments -->
+                        @if($feed->comments && $feed->comments->count() > 0)
+                            <div class="space-y-4 mb-4">
+                                @foreach($feed->comments as $comment)
+                                    <div class="flex gap-3">
+                                        @if($comment->user->avatar)
+                                            <img src="{{ $comment->user->avatar }}" class="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200 flex-shrink-0" alt="Avatar">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                                {{ substr($comment->user->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div class="flex-1 min-w-0">
+                                            <div class="bg-white border border-slate-200 p-3 rounded-xl rounded-tl-none shadow-sm">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <div>
+                                                        <span class="text-xs font-bold text-slate-900">{{ $comment->user->name }}</span>
+                                                        @if($comment->user->role === 'admin')
+                                                            <span class="ml-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Admin</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[10px] text-slate-400">{{ $comment->created_at->diffForHumans() }}</span>
+                                                        @if($comment->user_id === auth()->id())
+                                                            <button 
+                                                                onclick="if(confirm('Delete this comment?')) { document.getElementById('delete-comment-{{ $comment->id }}').submit(); }"
+                                                                class="p-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                                title="Delete comment"
+                                                            >
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                </svg>
+                                                            </button>
+                                                            <form id="delete-comment-{{ $comment->id }}" action="{{ route('admin.feeds.comments.destroy', [$feed->id, $comment->id]) }}" method="POST" style="display:none;">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @if($comment->content)
+                                                    <p class="text-xs text-slate-700 break-words mb-1">{!! $comment->formatted_content !!}</p>
+                                                @endif
+                                                @if($comment->image)
+                                                    <img src="{{ $comment->image }}" class="rounded-lg max-h-32 object-cover border border-slate-200" alt="Comment Image">
+                                                @endif
+                                            </div>
+                                            
+                                            <!-- Reply Button -->
+                                            <div class="flex gap-4 mt-1 px-1">
+                                                <button onclick="document.getElementById('reply-form-{{ $comment->id }}').classList.toggle('hidden')" class="text-[10px] font-semibold text-slate-500 hover:text-slate-700">Reply</button>
+                                            </div>
+
+                                            <!-- Hidden Reply Form -->
+                                            <form id="reply-form-{{ $comment->id }}" action="{{ route('admin.feeds.comments.store', $feed->id) }}" method="POST" class="hidden flex gap-2 mt-2">
+                                                @csrf
+                                                <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                                <div class="flex-1 relative">
+                                                    <input 
+                                                        type="text" 
+                                                        id="reply-input-{{ $comment->id }}"
+                                                        name="content" 
+                                                        placeholder="Reply to {{ $comment->user->name }}..." 
+                                                        class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                                                    >
+                                                </div>
+                                                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-lg flex-shrink-0 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                                </button>
+                                            </form>
+
+                                            <!-- Replies -->
+                                            @if($comment->replies && $comment->replies->count() > 0)
+                                                <div class="mt-3 space-y-3 pl-4 border-l border-slate-200">
+                                                    @foreach($comment->replies as $reply)
+                                                        <div class="flex gap-2">
+                                                            @if($reply->user->avatar)
+                                                                <img src="{{ $reply->user->avatar }}" class="w-6 h-6 rounded-full object-cover ring-1 ring-slate-200 flex-shrink-0" alt="Avatar">
+                                                            @else
+                                                                <div class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-[9px] font-bold flex-shrink-0">
+                                                                    {{ substr($reply->user->name, 0, 1) }}
+                                                                </div>
+                                                            @endif
+                                                            <div class="flex-1 min-w-0 bg-white border border-slate-200 p-2 rounded-xl rounded-tl-none shadow-sm">
+                                                                <div class="flex items-center justify-between mb-0.5">
+                                                                    <div>
+                                                                        <span class="text-[11px] font-bold text-slate-900">{{ $reply->user->name }}</span>
+                                                                        @if($reply->user->role === 'admin')
+                                                                            <span class="ml-1 text-[8px] font-semibold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded">Admin</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="flex items-center gap-1.5">
+                                                                        <span class="text-[9px] text-slate-400">{{ $reply->created_at->diffForHumans() }}</span>
+                                                                        @if($reply->user_id === auth()->id())
+                                                                            <button 
+                                                                                onclick="if(confirm('Delete this reply?')) { document.getElementById('delete-reply-{{ $reply->id }}').submit(); }"
+                                                                                class="p-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                                                title="Delete reply"
+                                                                            >
+                                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                                </svg>
+                                                                            </button>
+                                                                            <form id="delete-reply-{{ $reply->id }}" action="{{ route('admin.feeds.comments.destroy', [$feed->id, $reply->id]) }}" method="POST" style="display:none;">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                            </form>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                                @if($reply->content)
+                                                                    <p class="text-[11px] text-slate-700 break-words mb-1">{!! $reply->formatted_content !!}</p>
+                                                                @endif
+                                                                @if($reply->image)
+                                                                    <img src="{{ $reply->image }}" class="rounded-lg max-h-24 object-cover border border-slate-200" alt="Reply Image">
+                                                                @endif
+                                                                <!-- Reply to Reply Button -->
+                                                                <div class="flex justify-end mt-1 px-1">
+                                                                    <button type="button" onclick="showReplyForm('{{ $comment->id }}', '{{ str_replace(' ', '', $reply->user->name) }}')" class="text-[9px] font-semibold text-slate-500 hover:text-slate-700">Reply</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <!-- Comment Form -->
+                        <form action="{{ route('admin.feeds.comments.store', $feed->id) }}" method="POST" class="flex gap-2 mt-2 pt-2 border-t border-slate-200">
+                            @csrf
+                            <div class="flex-1 relative">
+                                <input 
+                                    type="text" 
+                                    name="content" 
+                                    placeholder="Write a comment..." 
+                                    class="w-full text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400"
+                                >
+                            </div>
+                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg flex-shrink-0 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             @empty
@@ -316,6 +461,16 @@
 </div>
 
 <script>
+function showReplyForm(commentId, userName) {
+    const form = document.getElementById('reply-form-' + commentId);
+    const input = document.getElementById('reply-input-' + commentId);
+    if (form && input) {
+        form.classList.remove('hidden');
+        input.value = '@' + userName + ' ';
+        input.focus();
+    }
+}
+
 function handleMediaSelectAdmin(input) {
     const files = input.files;
     const preview = document.getElementById('mediaPreviewAdmin');
