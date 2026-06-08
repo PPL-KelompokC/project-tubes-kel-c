@@ -38,7 +38,7 @@
     <div>
         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mb-4 px-4">COMMUNITY</p>
         <div class="space-y-1">
-            <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+            <a href="{{ route('admin.feeds.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 {{ Request::routeIs('admin.feeds.*') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
                 @include('layouts.partials.icons.activity')
                 Activity Feeds
             </a>
@@ -61,7 +61,7 @@
                 @include('layouts.partials.icons.star')
                 Badge Management
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+            <a href="{{ route('admin.leaderboard.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-200 {{ Request::routeIs('admin.leaderboard.*') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}">
                 @include('layouts.partials.icons.trophy')
                 Leaderboard Control
             </a>
