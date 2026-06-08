@@ -116,7 +116,7 @@
         </div>
 
         <div class="divide-y divide-gray-50">
-            @foreach($filteredUsers as $i => $user)
+            @forelse($filteredUsers as $i => $user)
                 @php $rank = $i + 1; @endphp
                 <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors {{ ($user['isCurrentUser'] ?? false) ? 'bg-green-50 border-l-4 border-l-green-500' : '' }} animate-count-in" style="animation-delay: {{ $i * 0.05 }}s">
                     <!-- Rank -->
@@ -177,21 +177,42 @@
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="px-4 py-12 text-center">
+                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <p class="text-gray-900 font-bold mb-1">User Not Found</p>
+                    <p class="text-sm text-gray-500">We couldn't find anyone matching "{{ $search }}".</p>
+                </div>
+            @endforelse
         </div>
     </div>
 
     <!-- Your rank callout -->
+    @php
+        $rankAbove = \App\Models\User::where('role', '!=', 'admin')->where('points', '>', $currentUser->points)->orderBy('points', 'asc')->first();
+        $pointsToNextRank = $rankAbove ? $rankAbove->points - $currentUser->points + 1 : 0;
+    @endphp
     <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4 flex items-center gap-4">
         <div class="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
         </div>
         <div class="flex-1">
-            <p class="text-sm font-bold text-green-900">Your Current Rank: #4</p>
-            <p class="text-xs text-green-700">You're only 1,050 pts away from 3rd place!</p>
+            <p class="text-sm font-bold text-green-900">Your Current Rank: #{{ $myRankAllTime }}</p>
+            @if($myRankAllTime == 1)
+                <p class="text-xs text-green-700">You are in 1st place! Keep up the great work!</p>
+            @elseif($pointsToNextRank > 0)
+                <p class="text-xs text-green-700">You're only {{ number_format($pointsToNextRank) }} pts away from rank #{{ $myRankAllTime - 1 }}!</p>
+            @else
+                <p class="text-xs text-green-700">Keep earning points to rank up!</p>
+            @endif
         </div>
         <div class="text-right">
-            <p class="text-lg font-black text-green-700">8,750</p>
+            <p class="text-lg font-black text-green-700">{{ number_format($currentUser->points) }}</p>
             <p class="text-[10px] text-green-600">total points</p>
         </div>
     </div>
