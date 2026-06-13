@@ -27,6 +27,8 @@ class User extends Authenticatable
         'last_active_date',
         'carbon_saved',
         'challenges_completed',
+        'referral_code',
+        'referred_by',
     ];
 
     protected $hidden = [
@@ -44,6 +46,16 @@ class User extends Authenticatable
     }
 
     // ── Relationships ──────────────────────────────────────────────
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
 
     public function challenges()
     {
@@ -64,11 +76,14 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
+<<<<<<< HEAD
+=======
     public function joinedEvents()
     {
         return $this->belongsToMany(Event::class, 'event_user');
     }
 
+>>>>>>> b7f29169b8d5ed13033c75472146d88a00b480d3
     public function feeds()
     {
         return $this->hasMany(Feed::class);
