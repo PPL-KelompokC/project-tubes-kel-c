@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Profile - EcoChallenge')
+@section('title', 'My Profile - TerraVerde')
 
 @section('content')
 @php
@@ -28,7 +28,7 @@
         return ['id' => $s->id, 'title' => $s->challenge->title, 'category' => $s->challenge->category, 'co2Saved' => $s->challenge->co2_saved, 'points' => $s->points_awarded, 'emoji' => '🎯'];
     });
 
-    $myPosts = collect([]); // Placeholder for future post system
+    $myPosts = $user->feeds()->latest()->take(3)->get();
 
     $rarityColors = [
         'common' => ['bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'border' => 'border-gray-200'],
@@ -41,30 +41,54 @@
 @endphp
 
 <div class="p-4 lg:p-6 max-w-4xl mx-auto space-y-6">
+<!-- Success and Error Messages -->
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3 animate-bounce-in">
+            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
+        </div>
+    @endif
+    @error('avatar')
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 animate-bounce-in">
+            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <p class="text-sm text-red-700 font-medium">{{ $message }}</p>
+        </div>
+    @enderror
+
     <!-- Profile card -->
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden animate-bounce-in">
         <!-- Cover banner -->
         <div class="eco-gradient h-32 relative eco-pattern">
             <div class="absolute -bottom-12 left-6 flex items-end gap-4">
-                <div class="relative group">
+                <div class="relative group cursor-pointer" onclick="document.getElementById('avatarInput').click()">
                     <img
                         src="{{ $currentUser['avatar'] }}"
                         alt="{{ $currentUser['name'] }}"
-                        class="w-24 h-24 rounded-2xl object-cover ring-4 ring-white shadow-lg"
+                        class="w-24 h-24 rounded-2xl object-cover ring-4 ring-white shadow-lg transition-all group-hover:brightness-75"
                     />
-                    <div class="absolute -bottom-1.5 -right-1.5 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-8 h-8 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div class="absolute -bottom-1.5 -right-1.5 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
                         Lv.{{ $currentUser['level'] }}
                     </div>
                 </div>
             </div>
+
+            <!-- Hidden Form for Avatar Upload -->
+            <form id="avatarForm" action="{{ route('profile.avatar.update') }}" method="POST" enctype="multipart/form-data" class="hidden">
+                @csrf
+                <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="document.getElementById('avatarForm').submit();" />
+            </form>
+
             <div class="absolute top-4 right-4 flex gap-2">
                 <button class="bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 hover:bg-white/30 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
                     Share
                 </button>
-                <button class="bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 hover:bg-white/30 transition-colors">
+                <button onclick="document.getElementById('avatarInput').click()" class="bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 hover:bg-white/30 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    Edit
+                    Edit Photo
                 </button>
             </div>
         </div>
@@ -178,28 +202,141 @@
 
     <!-- Recent activity -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <h3 class="text-sm font-bold text-gray-900 mb-4">My Recent Posts</h3>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-gray-900">My Recent Posts</h3>
+            <a href="{{ route('feed') }}" class="text-xs font-semibold text-green-600 hover:text-green-700 flex items-center gap-1">
+                View All
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
         <div class="space-y-3">
-            @foreach($myPosts as $post)
-                <div class="flex gap-3">
+            @forelse($myPosts as $post)
+                <div class="flex gap-3 group">
                     <img src="{{ $currentUser['avatar'] }}" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                    <div class="flex-1 bg-gray-50 rounded-xl p-3">
-                        <p class="text-xs text-gray-700">{{ $post['content'] }}</p>
+                    <div class="flex-1 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 cursor-pointer transition-colors" onclick="window.location.href='{{ route('feed.show', $post) }}'">
+                        <p class="text-xs text-gray-700">{{ Str::limit($post->caption, 100) }}</p>
+                        
+                        @if($post->media && count($post->media) > 0)
+                            <div class="mt-2 grid grid-cols-2 gap-1">
+                                @foreach(array_slice($post->media, 0, 2) as $media)
+                                    @php
+                                        $url = is_array($media) ? ($media['url'] ?? $media) : $media;
+                                        $type = is_array($media) ? ($media['type'] ?? 'image') : 'image';
+                                    @endphp
+                                    @if($type === 'video')
+                                        <video class="w-full h-20 object-cover rounded-lg bg-gray-200">
+                                            <source src="{{ $url }}" />
+                                        </video>
+                                    @else
+                                        <img src="{{ $url }}" class="w-full h-20 object-cover rounded-lg border border-gray-200" />
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+
                         <div class="flex items-center gap-3 mt-2 text-[10px] text-gray-400">
                             <span class="flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-red-400"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                                {{ $post['likes'] }}
+                                {{ $post->likes_count }}
                             </span>
                             <span class="flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                {{ $post['comments'] }}
+                                {{ $post->comments_count }}
                             </span>
-                            <span>{{ $post['timestamp'] }}</span>
+                            <span>{{ $post->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
+
+                    <!-- Edit/Delete Actions -->
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
+                        <a href="{{ route('feed.edit', $post) }}" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </a>
+                        <button onclick="openDeletePostModal('{{ $post->id }}')" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="text-center py-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
+                    <p class="text-xs text-gray-500">No posts yet. Go to Activity Feed to share your eco action!</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>
+
+<!-- Delete Post Modal -->
+<div id="deletePostModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full">
+        <div class="bg-red-50 px-6 py-4 border-b border-red-200 rounded-t-2xl flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-2v-2m0-4v-2M6.228 6.228l1.414 1.414m9.9-1.414l1.414-1.414m0 9.9l1.414 1.414m-1.414 9.9l-1.414-1.414m9.9-1.414l1.414 1.414m-1.414 9.9l-1.414-1.414M6.228 17.772l1.414 1.414m9.9-1.414l1.414 1.414m-9.9-15.85a9 9 0 1018 0 9 9 0 00-18 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900">Delete Post?</h2>
+        </div>
+        <div class="px-6 py-4">
+            <p class="text-gray-700 text-sm">Are you sure you want to delete this post? This action cannot be undone.</p>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex gap-3">
+            <button 
+                onclick="closeDeletePostModal()"
+                class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmDeletePost()"
+                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+            >
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let deletePostData = { postId: null };
+
+    function openDeletePostModal(postId) {
+        deletePostData.postId = postId;
+        document.getElementById('deletePostModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeletePostModal() {
+        document.getElementById('deletePostModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        deletePostData.postId = null;
+    }
+
+    function confirmDeletePost() {
+        if (deletePostData.postId) {
+            window.location.href = '/feed/' + deletePostData.postId + '?_method=DELETE&_token={{ csrf_token() }}';
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/feed/' + deletePostData.postId;
+            form.innerHTML = '@csrf @method("DELETE")';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    document.getElementById('deletePostModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeDeletePostModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeDeletePostModal();
+    });
+</script>
+
 @endsection

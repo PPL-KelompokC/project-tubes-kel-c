@@ -55,6 +55,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/leaderboard/reset',            [App\Http\Controllers\Admin\LeaderboardController::class, 'reset'])->name('leaderboard.reset');
     Route::post('/leaderboard/{user}/adjust',    [App\Http\Controllers\Admin\LeaderboardController::class, 'adjust'])->name('leaderboard.adjust');
 
+
     // Feed Management (Activity Feed Moderation)
     Route::get('/feeds', [AdminFeed::class, 'index'])->name('feeds.index');
     Route::get('/feeds/{feed}', [AdminFeed::class, 'show'])->name('feeds.show');

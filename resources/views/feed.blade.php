@@ -205,6 +205,7 @@
                 @endif
 
                 <!-- Engagement Stats -->
+
                 <div class="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-gray-100 flex items-center justify-between text-xs">
                     <div class="flex items-center gap-4">
                         <!-- Like Form -->
@@ -290,6 +291,7 @@
                                 <span class="text-sm text-gray-700 font-medium">Bagikan via...</span>
                             </button>
                         </div>
+
                     </div>
                 </div>
 

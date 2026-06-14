@@ -2,28 +2,131 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Challenge;
+use App\Models\ChallengeSubmission;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChallengeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $challenges = Challenge::all()->map(function($c) use ($user) {
-            $userChallenge = $user->challenges()->where('challenge_id', $c->id)->first();
-            // Also check for pending_admin/verified in submissions (if user_challenges isn't fully synced)
-            $sub = \App\Models\ChallengeSubmission::where('user_id', $user->id)
-                ->where('challenge_id', $c->id)->latest()->first();
-            
+        $query = Challenge::query();
+
+        // Search (title, description, category)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+
+        // Category Tab
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        // Filter: Difficulty
+        if ($request->filled('difficulty')) {
+            $query->where('difficulty', $request->difficulty);
+        }
+
+        // Filter: Points Range
+        if ($request->filled('points_min') && $request->filled('points_max')) {
+            if ($request->points_min > $request->points_max) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['points_min' => 'Min points cannot be greater than max points.']);
+            }
+        }
+
+        // Filter: CO2 Range
+        if ($request->filled('co2_min') && $request->filled('co2_max')) {
+            if ($request->co2_min > $request->co2_max) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['co2_min' => 'Min CO2 cannot be greater than max CO2.']);
+            }
+        }
+
+        // Filter: Points Range Apply
+        if ($request->filled('points_min')) {
+            $query->where('points', '>=', $request->points_min);
+        }
+        if ($request->filled('points_max')) {
+            $query->where('points', '<=', $request->points_max);
+        }
+
+        // Filter: CO2 Range Apply
+        if ($request->filled('co2_min')) {
+            $query->where('co2_saved', '>=', $request->co2_min);
+        }
+        if ($request->filled('co2_max')) {
+            $query->where('co2_saved', '<=', $request->co2_max);
+        }
+
+        // Filter: Status (completed/uncompleted)
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'completed') {
+                $query->whereHas('submissions', function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->where('status', 'verified')
+                      ->whereDate('created_at', today());
+                });
+            } elseif ($request->status === 'uncompleted') {
+                $query->whereDoesntHave('submissions', function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->where('status', 'verified')
+                      ->whereDate('created_at', today());
+                });
+            }
+        }
+
+        // Sort
+        switch ($request->sort) {
+            case 'points_high':
+                $query->orderBy('points', 'desc');
+                break;
+            case 'points_low':
+                $query->orderBy('points', 'asc');
+                break;
+            case 'co2_high':
+                $query->orderBy('co2_saved', 'desc');
+                break;
+            case 'co2_low':
+                $query->orderBy('co2_saved', 'asc');
+                break;
+            case 'popular':
+                $query->withCount('submissions')->orderBy('submissions_count', 'desc');
+                break;
+            case 'newest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $challenges = $query->get()->map(function ($c) use ($user) {
+            // Check submission status for current user (Treat all as daily)
+            $sub = ChallengeSubmission::where('user_id', $user->id)
+                ->where('challenge_id', $c->id)
+                ->whereDate('created_at', today())
+                ->latest()
+                ->first();
+
             $status = 'pending';
-            if ($userChallenge && $userChallenge->pivot->status === 'completed') {
-                $status = 'completed';
-            } elseif ($sub && in_array($sub->status, ['verified', 'pending_admin'])) {
-                $status = 'completed';
+            if ($sub) {
+                if ($sub->status === 'verified') {
+                    $status = 'completed';
+                } elseif ($sub->status === 'pending_admin') {
+                    $status = 'on_verify';
+                } elseif ($sub->status === 'rejected') {
+                    $status = 'rejected';
+                }
             }
 
             return [
@@ -35,9 +138,10 @@ class ChallengeController extends Controller
                 'points' => $c->points,
                 'co2Saved' => $c->co2_saved,
                 'status' => $status,
+                'submission' => $sub,
                 'imageUrl' => $c->image_url,
-                'participants' => rand(100, 2000), // Mock data
-                'impact' => 'Reduced carbon footprint'
+                'participants' => $c->submissions()->distinct('user_id')->count(),
+                'impact' => $c->impact ?? 'Reduced carbon footprint'
             ];
         });
 
@@ -70,5 +174,10 @@ class ChallengeController extends Controller
         }
 
         return back();
+    }
+
+    public function show(Challenge $challenge)
+    {
+        return response()->json($challenge->load('submissions'));
     }
 }

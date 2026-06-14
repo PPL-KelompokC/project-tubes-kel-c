@@ -257,7 +257,7 @@
                 </div>
             </div>
             <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <p class="text-gray-500 text-xs">© 2024 Climate Action Tracker. All rights reserved.</p>
+                <p class="text-gray-500 text-xs">© 2026 TerraVerde. All rights reserved.</p>
                 <div class="flex gap-8 text-xs text-gray-500">
                     <span>SDG 13 - Climate Action</span>
                     <span>Indonesia</span>

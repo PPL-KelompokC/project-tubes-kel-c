@@ -80,10 +80,16 @@
                             <td class="px-8 py-6">
                                 <div class="space-y-1">
                                     <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                        <span class="text-emerald-500">⭐</span> {{ $challenge->points }} pts
+                                        <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        {{ $challenge->points }} pts
                                     </p>
                                     <p class="text-[10px] font-medium text-emerald-600 flex items-center gap-1.5">
-                                        <span class="text-emerald-400">🌱</span> -{{ $challenge->co2_saved }}kg CO₂
+                                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                        -{{ $challenge->co2_saved }}kg CO₂
                                     </p>
                                 </div>
                             </td>

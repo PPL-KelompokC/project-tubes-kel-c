@@ -95,6 +95,9 @@ class ChallengeSubmissionController extends Controller
             'status'         => 'pending_admin',
         ]);
 
+        // Update streak immediately upon submission
+        $user->updateStreak();
+
         return redirect()->route('dashboard')
             ->with('success', 'Submission received, waiting for admin review.');
     }

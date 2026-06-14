@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Panel - EcoChallenge')
+@section('title', 'Admin Panel - TerraVerde')
 
 @section('content')
 @php
@@ -34,7 +34,7 @@
     <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-5 text-white flex items-center justify-between animate-bounce-in">
         <div>
             <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">Admin Panel</p>
-            <h1 class="text-xl font-black mt-0.5">EcoChallenge Dashboard</h1>
+            <h1 class="text-xl font-black mt-0.5">TerraVerde Dashboard</h1>
             <p class="text-gray-400 text-xs mt-1">Last updated: March 17, 2024 · 09:42 AM</p>
         </div>
         <div class="text-4xl">⚙️</div>

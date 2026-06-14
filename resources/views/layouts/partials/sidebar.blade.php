@@ -94,13 +94,14 @@
             <div class="mb-3">
                 <p class="text-[10px] font-bold text-gray-400 tracking-widest px-2 mb-1.5">{{ $group['label'] }}</p>
                 @foreach(collect($navItems)->where('group', $group['id']) as $item)
-                    @php $isActive = Request::routeIs($item['path']); @endphp
-                    <a href="{{ route($item['path']) }}" class="flex items-center gap-3 px-2.5 py-2 rounded-xl mb-0.5 transition-all duration-150 {{ $isActive ? 'bg-green-600 text-white shadow-sm shadow-green-200' : 'text-gray-600 hover:bg-green-50 hover:text-green-700' }}">
+                    @php $isActive = $item['path'] !== '#' && Request::routeIs($item['path']); @endphp
+                    <a href="{{ $item['path'] === '#' ? '#' : route($item['path']) }}" class="flex items-center gap-3 px-2.5 py-2 rounded-xl mb-0.5 transition-all duration-150 {{ $isActive ? 'bg-green-600 text-white shadow-sm shadow-green-200' : 'text-gray-600 hover:bg-green-50 hover:text-green-700' }}">
                         <div class="relative flex-shrink-0">
                             <!-- Simple SVG Icons based on Lucide names -->
                             @include('layouts.partials.icons.' . $item['icon'], ['class' => 'w-4.5 h-4.5 ' . ($isActive ? 'text-white' : '')])
-                            @if($item['path'] === 'notifications')
-                                <span class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif">3</span>
+                            @if($item['path'] === 'notifications' || $item['label'] === 'Notifications')
+                                @php $sidebarUnread = auth()->user() ? auth()->user()->unreadNotifications()->count() : 0; @endphp
+                                <span id="sidebar-notif-badge" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-notif {{ $sidebarUnread > 0 ? '' : 'hidden' }}">{{ $sidebarUnread }}</span>
                             @endif
                         </div>
                         <span class="text-sm font-medium {{ $isActive ? 'text-white' : '' }}">{{ $item['label'] }}</span>
