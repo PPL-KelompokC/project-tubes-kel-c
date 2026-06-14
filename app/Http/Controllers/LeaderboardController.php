@@ -12,13 +12,25 @@ class LeaderboardController extends Controller
     public function index()
     {
         // ── All-time leaderboard ──────────────────────────────────
+        $rank = 1;
+        $actualRank = 1;
+        $previousPoints = null;
+
         $allTimeUsers = User::where('role', '!=', 'admin')
             ->orderByDesc('points')
+            ->orderBy('id')
             ->take(50)
             ->get()
-            ->map(function ($user, $index) {
+            ->map(function ($user) use (&$rank, &$actualRank, &$previousPoints) {
+                if ($previousPoints !== null && $user->points < $previousPoints) {
+                    $rank = $actualRank;
+                }
+                $currentRank = $rank;
+                $previousPoints = $user->points;
+                $actualRank++;
+
                 return [
-                    'rank'                => $index + 1,
+                    'rank'                => $currentRank,
                     'name'                => $user->name,
                     'avatar'              => $user->avatar,
                     'points'              => $user->points,
@@ -42,10 +54,21 @@ class LeaderboardController extends Controller
             ->take(50)
             ->get();
 
-        $weeklyUsers = $weeklyRaw->map(function ($row, $index) {
+        $wRank = 1;
+        $wActualRank = 1;
+        $wPreviousPoints = null;
+
+        $weeklyUsers = $weeklyRaw->map(function ($row) use (&$wRank, &$wActualRank, &$wPreviousPoints) {
             $user = $row->user;
+            if ($wPreviousPoints !== null && $row->week_points < $wPreviousPoints) {
+                $wRank = $wActualRank;
+            }
+            $currentRank = $wRank;
+            $wPreviousPoints = $row->week_points;
+            $wActualRank++;
+
             return [
-                'rank'          => $index + 1,
+                'rank'          => $currentRank,
                 'name'          => $user->name,
                 'avatar'        => $user->avatar,
                 'points'        => $row->week_points,

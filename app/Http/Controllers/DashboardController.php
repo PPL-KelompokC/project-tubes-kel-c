@@ -57,7 +57,24 @@ class DashboardController extends Controller
 
         // ── Sidebar stats ──────────────────────────────────────────
         $rank     = User::where('role', '!=', 'admin')->where('points', '>', $user->points)->count() + 1;
-        $topUsers = User::where('role', '!=', 'admin')->orderByDesc('points')->take(5)->get();
+        $dRank = 1;
+        $dActualRank = 1;
+        $dPreviousPoints = null;
+        
+        $topUsers = User::where('role', '!=', 'admin')
+            ->orderByDesc('points')
+            ->orderBy('id')
+            ->take(5)
+            ->get()
+            ->map(function ($u) use (&$dRank, &$dActualRank, &$dPreviousPoints) {
+                if ($dPreviousPoints !== null && $u->points < $dPreviousPoints) {
+                    $dRank = $dActualRank;
+                }
+                $u->computed_rank = $dRank;
+                $dPreviousPoints = $u->points;
+                $dActualRank++;
+                return $u;
+            });
 
         // ── FIX 2: Weekly chart data from verified submissions ─────
         $weeklyData  = [];

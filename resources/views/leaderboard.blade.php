@@ -4,7 +4,18 @@
 
 @section('content')
 @php
-    $allUsers = \App\Models\User::orderBy('points', 'desc')->get()->map(function($u) {
+    $rankCounter = 1;
+    $actualRankCounter = 1;
+    $prevPoints = null;
+
+    $allUsers = \App\Models\User::where('role', '!=', 'admin')->orderBy('points', 'desc')->orderBy('id', 'asc')->get()->map(function($u) use (&$rankCounter, &$actualRankCounter, &$prevPoints) {
+        if ($prevPoints !== null && $u->points < $prevPoints) {
+            $rankCounter = $actualRankCounter;
+        }
+        $r = $rankCounter;
+        $prevPoints = $u->points;
+        $actualRankCounter++;
+
         return [
             'id' => $u->id,
             'name' => $u->name,
@@ -17,7 +28,8 @@
             'location' => $u->location ?? 'Not set',
             'level' => floor($u->points / 1000) + 1,
             'change' => 'same',
-            'isCurrentUser' => $u->id === Auth::id()
+            'isCurrentUser' => $u->id === Auth::id(),
+            'computed_rank' => $r
         ];
     });
 
@@ -34,9 +46,9 @@
 
     // Podium order: 2nd, 1st, 3rd
     $podiumOrder = [];
-    if ($top3->count() >= 2) $podiumOrder[] = ['user' => $top3[1], 'rank' => 2, 'height' => 'h-20', 'ringColor' => 'ring-gray-300'];
-    if ($top3->count() >= 1) $podiumOrder[] = ['user' => $top3[0], 'rank' => 1, 'height' => 'h-28', 'ringColor' => 'ring-yellow-300'];
-    if ($top3->count() >= 3) $podiumOrder[] = ['user' => $top3[2], 'rank' => 3, 'height' => 'h-16', 'ringColor' => 'ring-orange-300'];
+    if ($top3->count() >= 2) $podiumOrder[] = ['user' => $top3[1], 'rank' => $top3[1]['computed_rank'], 'height' => 'h-20', 'ringColor' => 'ring-gray-300', 'idx' => 2];
+    if ($top3->count() >= 1) $podiumOrder[] = ['user' => $top3[0], 'rank' => $top3[0]['computed_rank'], 'height' => 'h-28', 'ringColor' => 'ring-yellow-300', 'idx' => 1];
+    if ($top3->count() >= 3) $podiumOrder[] = ['user' => $top3[2], 'rank' => $top3[2]['computed_rank'], 'height' => 'h-16', 'ringColor' => 'ring-orange-300', 'idx' => 3];
 @endphp
 
 <div class="p-4 lg:p-6 max-w-3xl mx-auto space-y-6">
@@ -71,7 +83,7 @@
                                     {{ substr($user['name'], 0, 1) }}
                                 </div>
                             @endif
-                            <div class="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black {{ $item['rank'] === 1 ? 'bg-yellow-400 text-yellow-900' : ($item['rank'] === 2 ? 'bg-gray-300 text-gray-700' : 'bg-orange-400 text-white') }}">
+                            <div class="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black {{ $item['idx'] === 1 ? 'bg-yellow-400 text-yellow-900' : ($item['idx'] === 2 ? 'bg-gray-300 text-gray-700' : 'bg-orange-400 text-white') }}">
                                 {{ $item['rank'] }}
                             </div>
                             @if($user['isCurrentUser'] ?? false)
@@ -86,7 +98,7 @@
                         </div>
 
                         <!-- Podium block -->
-                        <div class="{{ $item['height'] }} w-20 {{ $item['rank'] === 1 ? 'bg-yellow-400/30' : 'bg-white/15' }} rounded-t-xl backdrop-blur-sm flex items-center justify-center">
+                        <div class="{{ $item['height'] }} w-20 {{ $item['idx'] === 1 ? 'bg-yellow-400/30' : 'bg-white/15' }} rounded-t-xl backdrop-blur-sm flex items-center justify-center">
                             <span class="text-white font-black text-2xl">#{{ $item['rank'] }}</span>
                         </div>
                     </div>
@@ -117,12 +129,12 @@
 
         <div class="divide-y divide-gray-50">
             @forelse($filteredUsers as $i => $user)
-                @php $rank = $i + 1; @endphp
+                @php $rank = $user['computed_rank']; @endphp
                 <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors {{ ($user['isCurrentUser'] ?? false) ? 'bg-green-50 border-l-4 border-l-green-500' : '' }} animate-count-in" style="animation-delay: {{ $i * 0.05 }}s">
                     <!-- Rank -->
                     <div class="w-8 flex-shrink-0 text-center">
-                        @if($rank <= 3)
-                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 {{ $rank === 1 ? 'bg-yellow-400 text-yellow-900' : ($rank === 2 ? 'bg-gray-300 text-gray-700' : 'bg-orange-400 text-white') }}">
+                        @if($i <= 2)
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 {{ $i === 0 ? 'bg-yellow-400 text-yellow-900' : ($i === 1 ? 'bg-gray-300 text-gray-700' : 'bg-orange-400 text-white') }}">
                                 {{ $rank }}
                             </div>
                         @else
