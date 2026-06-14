@@ -27,6 +27,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        // Update login streak
+        auth()->user()->updateStreak();
+
         if (auth()->user()->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }

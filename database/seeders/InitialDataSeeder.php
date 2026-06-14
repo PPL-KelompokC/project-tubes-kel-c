@@ -166,7 +166,6 @@ class InitialDataSeeder extends Seeder
                 Event::updateOrCreate(['name' => $event['name']], $event);
             }
         }
-    }
 
         // Badges
         $badges = [

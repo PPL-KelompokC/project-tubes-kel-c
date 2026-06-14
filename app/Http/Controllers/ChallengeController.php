@@ -148,6 +148,34 @@ class ChallengeController extends Controller
         return view('challenges', compact('challenges'));
     }
 
+    public function quickComplete(Challenge $challenge)
+    {
+        $user = Auth::user();
+        
+        $existing = \App\Models\ChallengeSubmission::where('user_id', $user->id)
+            ->where('challenge_id', $challenge->id)
+            ->whereDate('created_at', today())
+            ->first();
+
+        if (!$existing) {
+            \App\Models\ChallengeSubmission::create([
+                'user_id'        => $user->id,
+                'challenge_id'   => $challenge->id,
+                'photo_path'     => 'quick_complete',
+                'status'         => 'verified',
+                'points_awarded' => $challenge->points,
+                'verified_at'    => now(),
+            ]);
+
+            $user->increment('points', $challenge->points);
+            $user->increment('carbon_saved', $challenge->co2_saved);
+            $user->increment('challenges_completed');
+            $user->updateStreak();
+        }
+
+        return back();
+    }
+
     public function show(Challenge $challenge)
     {
         return response()->json($challenge->load('submissions'));

@@ -76,14 +76,10 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
-<<<<<<< HEAD
-=======
     public function joinedEvents()
     {
         return $this->belongsToMany(Event::class, 'event_user');
     }
-
->>>>>>> b7f29169b8d5ed13033c75472146d88a00b480d3
     public function feeds()
     {
         return $this->hasMany(Feed::class);

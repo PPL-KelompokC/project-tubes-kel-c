@@ -205,8 +205,8 @@
                 @foreach($topUsers as $i => $leader)
                     @php $isCurrentUser = $leader->id === Auth::id(); @endphp
                     <div class="flex items-center gap-3 p-2 rounded-xl {{ $isCurrentUser ? 'bg-green-50 border border-green-100' : '' }}">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 {{ $i == 0 ? 'bg-yellow-100 text-yellow-700' : ($i == 1 ? 'bg-gray-100 text-gray-600' : ($i == 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-500')) }}">
-                            {{ $i + 1 }}
+                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 {{ $leader->computed_rank == 1 ? 'bg-yellow-100 text-yellow-700' : ($leader->computed_rank == 2 ? 'bg-gray-100 text-gray-600' : ($leader->computed_rank == 3 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-500')) }}">
+                            {{ $leader->computed_rank }}
                         </span>
                         @if($leader->avatar)
                             <img src="{{ $leader->avatar }}" alt="{{ $leader->name }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0" />

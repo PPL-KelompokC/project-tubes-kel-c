@@ -49,6 +49,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('articles',   AdminArticle::class);
     Route::get('/referrals', [AdminReferral::class, 'index'])->name('referrals.index');
 
+    // Leaderboard Control
+    Route::get('/leaderboard',                   [App\Http\Controllers\Admin\LeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::get('/leaderboard/export',            [App\Http\Controllers\Admin\LeaderboardController::class, 'export'])->name('leaderboard.export');
+    Route::post('/leaderboard/reset',            [App\Http\Controllers\Admin\LeaderboardController::class, 'reset'])->name('leaderboard.reset');
+    Route::post('/leaderboard/{user}/adjust',    [App\Http\Controllers\Admin\LeaderboardController::class, 'adjust'])->name('leaderboard.adjust');
+
+
     // Feed Management (Activity Feed Moderation)
     Route::get('/feeds', [AdminFeed::class, 'index'])->name('feeds.index');
     Route::get('/feeds/{feed}', [AdminFeed::class, 'show'])->name('feeds.show');
